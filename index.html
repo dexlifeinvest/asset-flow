@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dex 資產分流防錯系統</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.11.0/dist/tabler-icons.min.css">
+<style>
+:root{
+  --bg:#f6f9fd; --surface:#ffffff; --surface2:#eef3fa; --line:#dbe4f0;
+  --text:#17273c; --muted:#647085; --faint:#94a0b2;
+  --accent:#3d8bf5; --accent-bg:#e7f0fe;
+  --red:#d84636; --red-bg:#fcecea; --amber:#d98a1f; --amber-bg:#fbf1de;
+  --green:#1f9d63; --green-bg:#e4f5ec; --gold:#c9922a; --gold-bg:#f8efd6;
+  --topbar-bg:rgba(246,249,253,.92); --onaccent:#fff; --ban-text:#a33526; --hover-shadow:rgba(61,139,245,.13);
+}
+/* ===== 暗色系（色票取自暗色版） ===== */
+html[data-theme="dark"]{
+  --bg:#161619; --surface:#1e1e22; --surface2:#26262c; --line:#34343c;
+  --text:#ecebe5; --muted:#9c9b93; --faint:#6d6c66;
+  --accent:#e6a13a; --accent-bg:#33290f;
+  --red:#e0574a; --red-bg:#37201d; --amber:#e6a13a; --amber-bg:#352a15;
+  --green:#4db07a; --green-bg:#16301f; --gold:#f2c94c; --gold-bg:#3a2f10;
+  --topbar-bg:rgba(22,22,25,.94); --onaccent:#231a08; --ban-text:#e79c93; --hover-shadow:rgba(0,0,0,.5);
+}
+html[data-theme="dark"] .metric{background:var(--surface2);}
+html[data-theme="dark"] .metric .k{color:var(--muted);}
+html[data-theme="dark"] .metric .v{color:var(--text);}
+html[data-theme="dark"] .saveline #pdfBtn{color:#0b2417;}
+html[data-theme="dark"] .saveline #pdfBtn:hover{background:#3f9468;}
+body,.card,.topbar,input,.metric{transition:background-color .18s ease, color .18s ease, border-color .18s ease;}
+*{box-sizing:border-box;}
+body{margin:0; background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif; line-height:1.6; padding:0 16px 24px;}
+.wrap{max-width:720px; margin:0 auto; display:flex; flex-direction:column; gap:32px;}
+.topbar{position:sticky; top:0; z-index:20; background:var(--topbar-bg); backdrop-filter:blur(6px); border-bottom:1px solid var(--line); margin:0 -16px 4px; padding:10px 16px; display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:space-between;}
+.nav{display:flex; flex-wrap:wrap; gap:6px;}
+.nav button{background:var(--surface2); border:1px solid var(--line); color:var(--muted); border-radius:999px; padding:5px 11px; font-size:12px; cursor:pointer; font-family:inherit;}
+.nav button:hover{border-color:var(--accent); color:var(--text);}
+.saveline{display:flex; align-items:center; gap:8px;}
+.saveline #themeBtn{background:var(--surface2); border:1px solid var(--line); color:var(--muted); border-radius:8px; padding:6px 12px; font-size:13px; cursor:pointer; font-family:inherit;}
+.saveline #themeBtn:hover{border-color:var(--accent); color:var(--text);}
+.saveline #saveBtn{background:var(--accent); border:none; color:var(--onaccent); border-radius:8px; padding:6px 14px; font-size:13px; font-weight:600; cursor:pointer; font-family:inherit;}
+.saveline #recordBtn{background:var(--accent-bg); border:1px solid var(--accent); color:var(--accent); border-radius:8px; padding:6px 12px; font-size:13px; font-weight:600; cursor:pointer; font-family:inherit;}
+.saveline #resetBtn{background:var(--surface2); border:1px solid var(--line); color:var(--muted); border-radius:8px; padding:6px 12px; font-size:13px; cursor:pointer; font-family:inherit;}
+.saveline #resetBtn:hover{border-color:var(--accent); color:var(--text);}
+.saveline #savedAt{font-size:11px; color:var(--muted);}
+.title{margin-top:8px;}
+.title h1{font-size:21px; font-weight:700; margin:0;}
+.title p{color:var(--muted); font-size:13px; margin:4px 0 0;}
+.card{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:16px 18px; scroll-margin-top:64px;}
+.hd{display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;}
+.hd .l{display:flex; align-items:center; gap:8px;}
+.hd i{font-size:20px; color:var(--accent);}
+.hd .t{font-size:16px; font-weight:600;}
+.hd .sum{font-size:13px; color:var(--muted);}
+.hd .sum b{color:var(--text); font-weight:600;}
+.sec{font-size:12px; color:var(--muted); margin:6px 0 6px;}
+label.f{font-size:12px; color:var(--muted); display:block;}
+input{width:100%; background:var(--surface2); border:1px solid var(--line); border-radius:8px; color:var(--text); padding:8px 10px; font-size:14px; margin-top:4px; font-family:inherit;}
+input::placeholder{color:var(--faint);}
+input:focus{outline:none; border-color:var(--accent);}
+input[readonly]{opacity:.6;}
+.grid3{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin-bottom:12px;}
+.grid2{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px;}
+.metrics{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px;}
+.metric{background:var(--accent); border-radius:10px; padding:14px;}
+.metric .k{font-size:12px; color:rgba(255,255,255,.82); margin-bottom:4px;}
+.metric .v{font-size:22px; font-weight:700; color:#fff;}
+.lamp{display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600; padding:4px 12px; border-radius:8px; background:var(--red-bg); color:var(--red);}
+.bar{height:10px; background:var(--surface2); border-radius:999px; overflow:hidden;}
+.bar > div{height:100%; width:0%; background:var(--red); border-radius:999px; transition:width .2s, background .2s;}
+.hint{font-size:12px; color:var(--muted); margin-top:6px;}
+.buckets{display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:8px;}
+.bk{border:1px solid var(--line); border-radius:12px; padding:12px 6px; text-align:center;}
+.bk i{font-size:22px; color:var(--muted);}
+.bk .n{font-size:12px; font-weight:600; margin-top:6px;}
+.bk .a{font-size:14px; font-weight:700; margin-top:4px;}
+.bk .p{font-size:11px; color:var(--muted); margin-top:2px;}
+.bk .memchk{display:flex; align-items:center; justify-content:center; gap:4px; font-size:11px; color:var(--muted); margin-top:6px;}
+.bk .memchk input{width:auto; margin:0;}
+.bk input.cost{font-size:12px; padding:4px 6px; text-align:center;}
+.note{display:flex; align-items:flex-start; gap:6px; margin-top:10px; padding:8px 10px; background:var(--surface2); border-radius:8px;}
+.note i{font-size:16px; color:var(--accent); margin-top:2px;}
+.note span{font-size:12px; color:var(--muted);}
+.split{margin-top:16px;}
+.srow{display:flex; align-items:center; gap:10px; margin-bottom:8px;}
+.srow .sn{font-size:13px; width:56px;}
+.srow .sv{font-size:13px; width:40px; text-align:right;}
+input[type=range]{-webkit-appearance:none; appearance:none; background:transparent; padding:0; border:none; margin:0; flex:1;}
+input[type=range]::-webkit-slider-runnable-track{height:4px; background:var(--line); border-radius:999px;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; margin-top:-7px; width:18px; height:18px; border-radius:50%; background:var(--accent); cursor:pointer;}
+input[type=range]::-moz-range-track{height:4px; background:var(--line); border-radius:999px;}
+input[type=range]::-moz-range-thumb{width:18px; height:18px; border:none; border-radius:50%; background:var(--accent); cursor:pointer;}
+.ban{background:var(--red-bg); border-radius:12px; padding:12px 14px;}
+.ban .h{display:flex; align-items:center; gap:6px; margin-bottom:6px;}
+.ban .h i{font-size:18px; color:var(--red);}
+.ban .h span{font-size:14px; font-weight:600; color:var(--red);}
+.ban p{font-size:12px; color:var(--ban-text); line-height:1.7; margin:0;}
+.ban ul{margin:6px 0 0; padding:0 0 0 20px; list-style:none;}
+.ban li{font-size:12px; color:var(--ban-text); line-height:1.7; margin-bottom:7px; position:relative;}
+.ban li:last-child{margin-bottom:0;}
+.ban li::before{content:'✕'; position:absolute; left:-18px; color:var(--red); font-weight:700;}
+.ban li b{color:var(--red);}
+.irow{display:flex; align-items:center; gap:10px; margin-bottom:8px;}
+.irow .in{font-size:13px; width:88px;}
+.irow input{flex:1; margin-top:0;}
+.irow .rt{font-size:12px; color:var(--muted); width:52px;}
+.irow .rt input{width:100%; padding:4px 6px; font-size:12px; text-align:center;}
+.irow .iv{font-size:13px; font-weight:600; width:86px; text-align:right;}
+.total{border-top:1px solid var(--line); padding-top:12px; display:flex; justify-content:space-between; align-items:baseline;}
+.total .v{font-size:20px; font-weight:700;}
+.mv{display:flex; justify-content:space-between; align-items:baseline; margin-top:8px;}
+.mv .v{font-size:15px; font-weight:600; color:var(--accent);}
+.boost .tools{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin-bottom:12px;}
+.boost .tool{text-align:center; padding:8px 4px; border:1px solid var(--line); border-radius:8px;}
+.boost .tool i{font-size:18px;}
+.boost .tool div{font-size:11px; margin-top:4px;}
+.risk{background:var(--surface2); border-radius:10px; padding:12px 14px; margin-top:4px;}
+.risk .rl{display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;}
+.risk .rl .k{font-size:13px; color:var(--muted);}
+.risk .rl .v{font-size:16px; font-weight:700;}
+.btn{align-self:flex-start; background:var(--surface2); border:1px solid var(--line); color:var(--text); border-radius:8px; padding:8px 14px; font-size:13px; cursor:pointer; font-family:inherit;}
+.btn:hover{border-color:var(--accent);}
+.foot{color:var(--faint); font-size:11px; line-height:1.7; text-align:center; padding:4px 0 8px;}
+.foot b{color:var(--muted);}
+#todayDate{font-size:13px; font-weight:400; color:var(--muted);}
+.saveline #recordBtn{background:var(--surface2); border:1px solid var(--line); color:var(--muted); border-radius:8px; padding:6px 12px; font-size:13px; cursor:pointer; font-family:inherit;}
+.saveline #recordBtn:hover{border-color:var(--accent); color:var(--text);}
+.chart{display:block; overflow-x:auto;}
+.chart .col{flex:1; min-width:28px; display:flex; flex-direction:column; align-items:center; justify-content:flex-end;}
+.chart .bar2{width:70%; max-width:34px; background:var(--accent); border-radius:4px 4px 0 0; min-height:2px; transition:height .2s;}
+.chart .val{font-size:10px; color:var(--muted); margin-bottom:4px; white-space:nowrap;}
+.chart .lab{font-size:10px; color:var(--faint); margin-top:4px; white-space:nowrap;}
+.empty{color:var(--faint); font-size:13px; text-align:center; padding:28px 0;}
+.wrap > *:not(.topbar){position:relative;}
+.wrap > *:not(.topbar):not(.title):not(.foot){transition:transform .18s ease, box-shadow .18s ease;}
+.wrap > *:not(.topbar):not(.title):not(.foot):hover{transform:scale(1.012); box-shadow:0 6px 20px var(--hover-shadow);}
+.wrap > *:not(.topbar):not(.title):not(.foot):not(#layer1)::before{content:''; position:absolute; top:-32px; left:50%; transform:translateX(-50%); width:2px; height:32px; background:var(--accent); opacity:.32;}
+.irow input.act{flex:none; width:82px; margin:0; padding:6px 6px; font-size:12px; text-align:right;}
+.irow .iv{width:76px;}
+.ihead{display:flex; align-items:center; gap:10px; margin-bottom:8px; font-size:11px; color:var(--muted);}
+.ihead .in{width:88px;} .ihead .c1{flex:1;} .ihead .rt{width:52px; text-align:center;} .ihead .iv{width:76px; text-align:right;} .ihead .act{width:82px; text-align:right;}
+.chartsvg{width:100%; height:auto; display:block;}
+.legend{display:flex; flex-direction:column; gap:4px; font-size:12px; color:var(--muted); margin-bottom:8px;}
+.legend span{display:inline-flex; align-items:center; gap:5px;}
+.legend .sq{width:11px; height:11px; border-radius:2px; background:var(--accent);}
+.legend .ln{width:16px; border-top:2px dashed var(--amber);}
+.chart{display:flex; gap:10px; align-items:flex-end; overflow-x:auto; padding:8px 0 0;}
+.chart .col{flex:0 0 auto; min-width:54px; text-align:center;}
+.chart .col .val{font-size:11px; color:var(--text); margin-bottom:4px;}
+.chart .col .barwrap{height:120px; display:flex; align-items:flex-end; justify-content:center;}
+.chart .col .b{width:26px; background:var(--accent); border-radius:6px 6px 0 0; transition:height .3s;}
+.chart .col .mo{font-size:11px; color:var(--muted); margin-top:6px;}
+.chart .col .cap{font-size:10px; color:var(--faint); margin-top:2px;}
+@media(max-width:560px){
+  .grid3{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .buckets{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .metrics{grid-template-columns:1fr;}
+}
+.saveline #pdfBtn{background:var(--green); border:none; color:#fff; border-radius:8px; padding:6px 12px; font-size:13px; font-weight:600; cursor:pointer; font-family:inherit;}
+.saveline #pdfBtn:hover{background:#157a4b;}
+@media print{
+  *{-webkit-print-color-adjust:exact !important; print-color-adjust:exact !important;}
+  /* 暗色模式下列印／匯出 PDF 一律還原成淺色，避免黑底吃光碳粉、文字看不見 */
+  html[data-theme="dark"]{
+    --bg:#f6f9fd; --surface:#ffffff; --surface2:#eef3fa; --line:#dbe4f0;
+    --text:#17273c; --muted:#647085; --faint:#94a0b2;
+    --accent:#3d8bf5; --accent-bg:#e7f0fe;
+    --red:#d84636; --red-bg:#fcecea; --amber:#d98a1f; --amber-bg:#fbf1de;
+    --green:#1f9d63; --green-bg:#e4f5ec; --gold:#c9922a; --gold-bg:#f8efd6;
+    --onaccent:#fff; --ban-text:#a33526;
+  }
+  html[data-theme="dark"] .metric{background:var(--accent) !important;}
+  html[data-theme="dark"] .metric .k{color:rgba(255,255,255,.82) !important;}
+  html[data-theme="dark"] .metric .v{color:#fff !important;}
+  body{background:#fff !important; padding:0 8px !important;}
+  .topbar{display:none !important;}
+  .wrap{gap:16px;}
+  .wrap > *{transform:none !important; box-shadow:none !important;}
+  .card,.ban,.metrics{page-break-inside:avoid;}
+  .foot{page-break-inside:avoid;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="nav">
+      <button data-go="layer1">1 收入</button>
+      <button data-go="layer2">2 支出</button>
+      <button data-go="layer3">3 分流</button>
+      <button data-go="layer4">4 開源收入</button>
+      <button data-go="layer5">5 加速器</button>
+      <button data-go="tracker">追蹤</button>
+    </div>
+    <div class="saveline">
+      <button id="saveBtn"><i class="ti ti-device-floppy"></i> 儲存</button>
+      <button id="recordBtn"><i class="ti ti-calendar-plus"></i> 紀錄此月</button>
+      <button id="pdfBtn"><i class="ti ti-file-type-pdf"></i> 匯出PDF檔</button>
+      <button id="resetBtn"><i class="ti ti-refresh"></i> 清空</button>
+      <button id="themeBtn"><i class="ti ti-moon"></i> 切換暗色</button>
+      <span id="savedAt">尚未儲存</span>
+    </div>
+  </div>
+
+  <div class="title" style="display:flex; align-items:center; gap:12px;">
+    <img src="logo.png" width="46" height="46" alt="Dex 生活投資 logo" style="flex-shrink:0; border-radius:8px;">
+    <div>
+      <h1>Dex 資產分流防錯系統 <span id="todayDate" style="font-size:13px; font-weight:400; color:var(--muted);"></span></h1>
+      <p style="margin:2px 0 0;">先守地基，再開源 — Dex 生活投資</p>
+    </div>
+  </div>
+
+  <div class="card" id="layer1">
+    <div class="hd">
+      <div class="l"><i class="ti ti-cash"></i><span class="t">第 1 層 · 每月收入</span></div>
+      <span class="sum">合計 <b id="incomeTotal">NT$0</b></span>
+    </div>
+    <div class="grid2">
+      <label class="f">主動收入（薪水等）<input type="number" id="active" min="0" step="1000" placeholder="60000"></label>
+      <label class="f">被動收入（自動帶入第4層）<input type="number" id="passiveShow" readonly placeholder="0"></label>
+    </div>
+    <div class="hint" id="passiveHint">被動收入由第 4 層開源自動帶入；超過 3,000/月 才計入合計，代表你開始站穩被動現金流。</div>
+  </div>
+
+  <div class="card" id="layer2">
+    <div class="hd">
+      <div class="l"><i class="ti ti-arrow-bounce"></i><span class="t">第 2 層 · 每月被動支出</span></div>
+      <span class="sum">合計 <b id="expTotal">NT$0</b></span>
+    </div>
+    <div class="sec">貸款</div>
+    <div class="grid3">
+      <label class="f">房貸<input type="number" class="exp" id="mortgage" min="0" step="500" placeholder="0"></label>
+      <label class="f">信貸<input type="number" class="exp" id="credit" min="0" step="500" placeholder="0"></label>
+      <label class="f">股票質押<input type="number" class="exp" id="pledge" min="0" step="500" placeholder="0"></label>
+    </div>
+    <div class="sec">訂閱費</div>
+    <div class="grid3">
+      <label class="f">YouTube<input type="number" class="exp" id="yt" min="0" step="50" placeholder="0"></label>
+      <label class="f">AI 工具<input type="number" class="exp" id="ai" min="0" step="50" placeholder="0"></label>
+      <label class="f">影音串流<input type="number" class="exp" id="media" min="0" step="50" placeholder="0"></label>
+    </div>
+    <div class="sec">家庭與生活</div>
+    <div class="grid3">
+      <label class="f">孝親費<input type="number" class="exp" id="parents" min="0" step="500" placeholder="0"></label>
+      <label class="f">育兒費<input type="number" class="exp" id="kids" min="0" step="500" placeholder="0"></label>
+      <label class="f">雜費（網路/水電/保險/各項APP訂閱費）<input type="number" class="exp" id="misc" min="0" step="100" placeholder="0"></label>
+    </div>
+    <div class="sec">其他</div>
+    <div class="grid2">
+      <input type="text" id="otherLabel" placeholder="自訂項目名稱">
+      <input type="number" class="exp" id="other" min="0" step="100" placeholder="0">
+    </div>
+  </div>
+
+  <div class="metrics">
+    <div class="metric"><div class="k">每月可分配</div><div class="v" id="disposable">NT$0</div></div>
+    <div class="metric"><div class="k">緊急預備金 3 倍防線（每月支出×3）</div><div class="v" id="target3">NT$0</div></div>
+    <div class="metric"><div class="k">總市值約</div><div class="v" id="totalMV">NT$0</div></div>
+  </div>
+
+  <div class="card">
+    <div class="hd">
+      <div class="l"><i class="ti ti-shield-half"></i><span class="t">地基 · 守住的錢（高利活存 1.5%）</span></div>
+      <span class="lamp" id="lamp"><i class="ti ti-alert-triangle"></i>未達標</span>
+    </div>
+    <div class="grid2" style="margin-bottom:12px;">
+      <label class="f">緊急預備金（建議 3~6 個月）<input type="number" id="emergency" min="0" step="1000" placeholder="至少 1 個月"></label>
+      <label class="f">現金（活用週轉，與預備金分開）<input type="number" id="cash" min="0" step="1000" placeholder="日常週轉現金"></label>
+    </div>
+    <div class="bar"><div id="bar"></div></div>
+    <div class="hint" id="baseHint">緊急預備金建議 3~6 個月：達 1 個月解鎖開源、3 個月亮綠燈；到 6 個月會提醒你地基夠厚、多的錢該挪去開源。</div>
+  </div>
+
+  <div class="card" id="layer3">
+    <div class="hd"><div class="l"><i class="ti ti-arrow-ramp-right"></i><span class="t">第 3 層 · 每月可分配分流</span></div></div>
+    <div class="sec" style="margin-top:-4px;">由左到右：先補地基，達 1 個月才解鎖開源。</div>
+    <div class="buckets">
+      <div class="bk" id="bkBase"><i class="ti ti-shield-half"></i><div class="n">緊急預備金</div><div class="a" id="amtBase">NT$0</div><div class="p" id="tagBase">補地基中</div></div>
+      <div class="bk src" id="bkCash"><i class="ti ti-wallet"></i><div class="n">現金</div><div class="a" id="amtCash">NT$0</div><div class="p" id="pctCash">20%</div></div>
+      <div class="bk src" id="bkEtf"><i class="ti ti-chart-line"></i><div class="n">ETF 配置</div><div class="a" id="amtEtf">NT$0</div><div class="p" id="pctEtf">60%</div></div>
+      <div class="bk" id="bkMem"><i class="ti ti-gift"></i><div class="n">股東紀念品</div><label class="memchk"><input type="checkbox" id="memOn"> 參與</label><input type="number" id="memCost" class="cost" min="0" step="1000" placeholder="成本 40000"></div>
+      <div class="bk src" id="bkUsdt"><i class="ti ti-coin"></i><div class="n">USDT 理財</div><div class="a" id="amtUsdt">NT$0</div><div class="p" id="pctUsdt">20%</div></div>
+    </div>
+    <div class="note"><i class="ti ti-transfer"></i><span>ETF 配置滿 1 張（1000 股）就能把股票借出去，多賺一筆借券收入。股東紀念品是一次性成本、每年回饋，打勾參與即可。</span></div>
+
+    <div class="split" id="splitBox" style="opacity:.45; pointer-events:none;">
+      <div class="sec">開源分流比例（地基解鎖後可調）</div>
+      <div class="srow"><span class="sn">ETF</span><input type="range" id="sEtf" min="0" max="100" step="5" value="60"><span class="sv" id="oEtf">60%</span></div>
+      <div class="srow"><span class="sn">現金</span><input type="range" id="sCash" min="0" max="100" step="5" value="20"><span class="sv" id="oCash">20%</span></div>
+      <div class="srow"><span class="sn">USDT</span><input type="range" id="sUsdt" min="0" max="100" step="5" value="20"><span class="sv" id="oUsdt">20%</span></div>
+    </div>
+  </div>
+
+  <div class="ban">
+    <div class="h"><i class="ti ti-ban"></i><span>防錯禁區（這套系統不碰）</span></div>
+    <ul>
+      <li>ETF 配置只做正常上市標的，禁止：未上市股、全額交割股、興櫃股、KY／DR、反向型 ETF。</li>
+      <li>槓桿型 ETF 基礎階段禁止（0050 正二僅限第 5 層進階解鎖後）。</li>
+      <li>投機工具全禁：權證、選擇權、期貨、外匯。</li>
+      <li><b>不要操作個股</b>，請想想機會成本。若真的手癢，單筆投入金額請以「自己的淨資產 ÷ 100」為上限，把試錯風險降到最低。</li>
+      <li>USDT 只做穩定幣領息，禁止加密貨幣合約。</li>
+    </ul>
+  </div>
+
+  <div class="card" id="layer4">
+    <div class="hd"><div class="l"><i class="ti ti-coins"></i><span class="t">第 4 層 · 開源收入（月）</span></div></div>
+    <div class="sec" style="margin-top:-4px;">左欄市值×假設利率÷12＝每月預估；右欄「實際」每月自己算好 key 進去，養成每月追蹤習慣。</div>
+    <div class="ihead"><span class="in">項目</span><span class="c1">市值</span><span class="rt">利率</span><span class="iv">預估/月</span><span class="act">實際/月</span></div>
+    <div class="irow"><span class="in">緊急預備金</span><input type="number" id="balBase" readonly placeholder="市值"><span class="rt">1.5%</span><span class="iv" id="incBase">NT$0</span><input type="number" class="act" id="actBase" min="0" step="100" placeholder="實際"></div>
+    <div class="irow"><span class="in">現金</span><input type="number" id="balCash" readonly placeholder="市值"><span class="rt">1.5%</span><span class="iv" id="incCash">NT$0</span><input type="number" class="act" id="actCash" min="0" step="100" placeholder="實際"></div>
+    <div class="irow"><span class="in">ETF 配置</span><input type="number" id="balEtf" min="0" step="1000" placeholder="市值"><span class="rt">8%</span><span class="iv" id="incEtf">NT$0</span><input type="number" class="act" id="actEtf" min="0" step="100" placeholder="實際"></div>
+    <div class="irow"><span class="in">股東紀念品 🎫🧼🧴</span><input type="number" id="balMem" readonly placeholder="＝成本"><span class="rt">回饋</span><span class="iv" id="incMem">NT$0</span><input type="number" class="act" id="actMem" min="0" step="100" placeholder="實際"></div>
+    <div class="irow"><span class="in">USDT 理財</span><input type="number" id="balUsdt" min="0" step="1000" placeholder="市值"><span class="rt">6%</span><span class="iv" id="incUsdt">NT$0</span><input type="number" class="act" id="actUsdt" min="0" step="100" placeholder="實際"></div>
+    <div class="irow" style="margin-bottom:12px;"><span class="in">其他開源</span><input type="number" id="otherOpenBal" min="0" step="1000" placeholder="市值"><span class="rt"><input type="number" id="otherOpenRate" min="0" step="0.5" placeholder="%"></span><span class="iv" id="incOther">NT$0</span><input type="number" class="act" id="actOther" min="0" step="100" placeholder="實際"></div>
+    <div class="mv"><span class="sec" style="margin:0;">開源總市值約</span><span class="v" id="openMV">NT$0</span></div>
+    <div class="total" style="margin-top:8px;"><span class="sec" style="margin:0;">月被動 · 預估／實際／目標3萬</span><span class="v"><span id="monthlyPassive">NT$0</span> <span style="color:var(--muted); font-size:12px;">/</span> <span id="monthlyActual" style="color:var(--accent);">NT$0</span></span></div>
+    <div class="bar" style="margin-top:8px; height:8px;"><div id="passiveBar" style="background:var(--green);"></div></div>
+    <div class="hint" id="memHint">股東紀念品打勾後每年約回饋 NT$20,000（月約 1,667；商品卡 🎫＋生活用品 🧼🧴🍚），市值＝你在第 3 層填的成本，免另填。</div>
+  </div>
+
+  <div class="card boost" id="layer5" style="opacity:.5;">
+    <div class="hd">
+      <div class="l"><i class="ti ti-rocket"></i><span class="t">第 5 層 · 優化加速器</span></div>
+      <span class="lamp" id="boostLock" style="background:var(--surface2); color:var(--muted);"><i class="ti ti-lock"></i>ETF 滿 30 萬解鎖</span>
+    </div>
+    <div class="hint" id="boostHint" style="margin-top:0; margin-bottom:10px;">ETF 破 30 萬解鎖良性負債、破 50 萬解鎖股票質押 — 進階資產優化。</div>
+    <div class="tools">
+      <div class="tool" id="toolDebt"><i class="ti ti-scale"></i><div>良性負債</div><div style="font-size:10px; color:var(--faint); margin-top:2px;">30 萬解鎖</div></div>
+      <div class="tool" id="toolPledge"><i class="ti ti-building-bank"></i><div>股票質押</div><div style="font-size:10px; color:var(--faint); margin-top:2px;">50 萬解鎖</div></div>
+      <div class="tool" id="toolLev"><i class="ti ti-trending-up"></i><div>槓桿型 0050 正二</div><div style="font-size:10px; color:var(--faint); margin-top:2px;">50 萬解鎖</div></div>
+    </div>
+    <div class="risk">
+      <div id="secDebt">
+        <div class="rl"><span class="k">良性負債 · 本金餘額（房貸／信貸分開列）<span id="debtLockTag" style="font-size:11px; color:var(--muted);">🔒 ETF 滿 30 萬解鎖</span></span></div>
+        <div class="grid2" style="margin-bottom:8px;">
+          <label class="f">房貸餘額<input type="number" id="debtMortgage" min="0" step="1000" placeholder="0"></label>
+          <label class="f">信貸餘額<input type="number" id="debtCredit" min="0" step="1000" placeholder="0"></label>
+        </div>
+        <div class="rl" style="margin-top:14px;"><span class="k">資產負債比（負債 ÷ 開源總市值）</span><span class="v" id="equityRatio">—</span></div>
+        <div class="bar" style="height:8px;"><div id="equityBar" style="background:var(--green);"></div></div>
+        <div class="hint" id="equityHint">坊間標準：🟢 20~50% 理想（約 30% 最舒服）、🟡 51~65% 警戒、🔴 &gt;65% 危險（貼近 75~80% 有破產風險）。負債＝房貸＋信貸＋質押借款。務必預想熊市長達 2 年。</div>
+      </div>
+
+      <div id="secPledge" style="margin-top:16px; border-top:1px solid var(--line); padding-top:14px;">
+        <div class="rl"><span class="k">股票質押 · 維持率 <span id="pledgeLockTag" style="font-size:11px; color:var(--muted);">🔒 ETF 滿 50 萬解鎖</span></span><span class="v" id="maintRatio">—</span></div>
+        <div class="grid2" style="margin-bottom:8px;">
+          <label class="f">股票總市值（擔保品）<input type="number" id="stockMV" min="0" step="1000" placeholder="0"></label>
+          <label class="f">質押借款餘額<input type="number" id="pledgeLoan" min="0" step="1000" placeholder="0"></label>
+        </div>
+        <div class="bar" style="height:8px;"><div id="maintBar" style="background:var(--green);"></div></div>
+        <div class="hint" id="maintHint">填股票總市值與質押借款，自動算維持率（≥300% 安全、200% 留意、166% 危險／斷頭線）。</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="tracker">
+    <div class="hd">
+      <div class="l"><i class="ti ti-chart-bar"></i><span class="t">每月追蹤 · 開源月被動收入</span></div>
+      <button id="clearRecs" style="background:var(--surface2); border:1px solid var(--line); color:var(--muted); border-radius:8px; padding:5px 10px; font-size:12px; cursor:pointer; font-family:inherit;">清空紀錄</button>
+    </div>
+    <div class="sec" style="margin-top:-4px;">每月按頂部「紀錄此月」，追蹤開源收入與總市值有沒有成長。</div>
+    <div class="chart" id="chart"></div>
+    <div class="hint" id="chartEmpty">還沒有紀錄。按頂部「紀錄此月」把這個月的開源月被動收入與總市值存下來。</div>
+  </div>
+
+  <div class="foot">
+    <b>⚠️ 獲利與風險警示</b><br>
+    本工具為財商教育與資產配置的方法示範，<b>非投資建議、非收益保證</b>。所有利率、報酬與被動收入皆為假設估算，實際結果因個人本金、標的與市場而異。投資有風險，過去績效不代表未來，槓桿與負債可能放大虧損、甚至損及本金；股市崩盤或長期熊市時務必保有足夠現金流與安全邊際。請自行評估並為自己的決策負責。<br><br>
+    <b>© Dex 生活投資</b>｜本系統由 Dex 設計，保留一切智慧財產權，未經授權請勿重製、散布或商業使用。<br>
+    資料只存在你的瀏覽器（localStorage），不會上傳。
+  </div>
+</div>
+
+<script>
+(function(){
+  var KEY='dex_asset_flow';
+  var fields=['active','mortgage','credit','pledge','yt','ai','media','parents','kids','misc','otherLabel','other','emergency','cash','balEtf','balUsdt','memOn','memCost','otherOpenBal','otherOpenRate','actBase','actCash','actEtf','actMem','actUsdt','actOther','stockMV','pledgeLoan','debtMortgage','debtCredit','sEtf','sCash','sUsdt'];
+  var fmt=function(n){return 'NT$'+Math.round(n||0).toLocaleString('en-US');};
+  var el=function(id){return document.getElementById(id);};
+  var num=function(id){var v=parseFloat(el(id).value);return isNaN(v)?0:Math.max(0,v);};
+  var R={base:0.015, cash:0.015, etf:0.08, usdt:0.06};
+  var MEM_YEAR=20000;
+
+  function load(){try{var s=JSON.parse(localStorage.getItem(KEY)||'{}');fields.forEach(function(f){if(s[f]===undefined||s[f]===null)return; if(f==='memOn'){el(f).checked=(s[f]==='1'||s[f]===true);} else {el(f).value=s[f];}}); if(s.__savedAt) el('savedAt').textContent='已儲存 '+s.__savedAt;}catch(e){}}
+  function stamp(){var d=new Date();var p=function(x){return (x<10?'0':'')+x;};return p(d.getMonth()+1)+'/'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes())+':'+p(d.getSeconds());}
+  function save(withStamp){var s={};fields.forEach(function(f){s[f]=(f==='memOn')?(el(f).checked?'1':'0'):el(f).value;}); if(withStamp){s.__savedAt=stamp(); el('savedAt').textContent='已儲存 '+s.__savedAt;} else {try{var old=JSON.parse(localStorage.getItem(KEY)||'{}'); if(old.__savedAt) s.__savedAt=old.__savedAt;}catch(e){}} try{localStorage.setItem(KEY,JSON.stringify(s));}catch(e){}}
+  function setLamp(bg,col){var l=el('lamp');l.style.background=bg;l.style.color=col;}
+
+  var RKEY='dex_asset_flow_records';
+  var LAST={est:0, act:0, mv:0};
+  function loadRecs(){try{return JSON.parse(localStorage.getItem(RKEY)||'[]');}catch(e){return [];}}
+  function saveRecs(a){try{localStorage.setItem(RKEY,JSON.stringify(a));}catch(e){}}
+  function monthKey(){var d=new Date();return d.getFullYear()+'/'+('0'+(d.getMonth()+1)).slice(-2);}
+  function recordMonth(){var recs=loadRecs();var m=monthKey();var f=recs.filter(function(r){return r.m===m;})[0]; if(f){f.a=LAST.act; f.e=LAST.est; f.v=LAST.mv;} else {recs.push({m:m,a:LAST.act,e:LAST.est,v:LAST.mv});} recs.sort(function(a,b){return a.m<b.m?-1:1;}); saveRecs(recs); renderChart(); el('savedAt').textContent='已紀錄 '+m; }
+  function renderChart(){
+    var recs=loadRecs(); var c=el('chart'); var em=el('chartEmpty');
+    if(!recs.length){c.innerHTML=''; em.style.display='block'; return;}
+    em.style.display='none';
+    var data=recs.slice(-12);
+    var maxV=1; data.forEach(function(r){ maxV=Math.max(maxV, r.a||0, r.e||0); });
+    var n=data.length, step=Math.max(48, Math.round(600/Math.max(n,1))), W=Math.max(320,n*step), top=16, plotH=120, base=top+plotH, bw=Math.min(26, step*0.5);
+    var cs=getComputedStyle(document.documentElement), cvar=function(k,d){var v=cs.getPropertyValue(k).trim(); return v||d;};
+    var cAccent=cvar('--accent','#3d8bf5'), cAmber=cvar('--amber','#d98a1f'), cMuted=cvar('--muted','#647085'), cLine=cvar('--line','#dbe4f0');
+    var bars='', line='', dots='', labs='';
+    data.forEach(function(r,i){var xc=step*i+step/2; var hb=Math.max(1,(r.a||0)/maxV*plotH); bars+='<rect x="'+(xc-bw/2)+'" y="'+(base-hb)+'" width="'+bw+'" height="'+hb+'" rx="3" fill="'+cAccent+'"><title>'+r.m+' 實際 '+fmt(r.a||0)+'</title></rect>'; var ye=base-(r.e||0)/maxV*plotH; line+=(i===0?'M':'L')+xc+' '+ye+' '; dots+='<circle cx="'+xc+'" cy="'+ye+'" r="3.5" fill="'+cAmber+'"><title>'+r.m+' 預估 '+fmt(r.e||0)+'</title></circle>'; labs+='<text x="'+xc+'" y="'+(base+16)+'" text-anchor="middle" font-size="10" fill="'+cMuted+'">'+r.m+'</text>';});
+    var svg='<svg class="chartsvg" viewBox="0 0 '+W+' '+(base+26)+'" preserveAspectRatio="xMidYMid meet"><line x1="0" y1="'+base+'" x2="'+W+'" y2="'+base+'" stroke="'+cLine+'" stroke-width="1"/>'+bars+'<path d="'+line+'" fill="none" stroke="'+cAmber+'" stroke-width="2" stroke-dasharray="5 4"/>'+dots+labs+'</svg>';
+    c.innerHTML='<div class="legend"><span><span class="sq"></span>實際被動收入</span><span><span class="ln"></span>預估（假設利率）</span></div>'+svg;
+  }
+
+  function render(){
+    var active=num('active');
+    var expTotal=num('mortgage')+num('credit')+num('pledge')+num('yt')+num('ai')+num('media')+num('parents')+num('kids')+num('misc')+num('other');
+    var emergency=num('emergency'), cash=num('cash');
+    var memOn=el('memOn').checked, memCost=num('memCost');
+
+    var iBase=emergency*R.base, iCash=cash*R.cash, iEtf=num('balEtf')*R.etf, iMem=memOn?MEM_YEAR:0, iUsdt=num('balUsdt')*R.usdt;
+    var iOther=num('otherOpenBal')*(num('otherOpenRate')/100);
+    var annualPassive=iBase+iCash+iEtf+iMem+iUsdt+iOther;
+    var passiveMonthly=annualPassive/12;
+    var passiveCounted=passiveMonthly>=3000?passiveMonthly:0;
+    var incomeTotal=active+passiveCounted;
+    var disposable=Math.max(0, incomeTotal-expTotal);
+    var t1=expTotal*1, t3=expTotal*3, t6=expTotal*6;
+    var unlocked=expTotal>0 && emergency>=t1;
+    var green=expTotal>0 && emergency>=t3;
+    var full=expTotal>0 && emergency>=t6;
+
+    el('passiveShow').value=Math.round(passiveMonthly)?Math.round(passiveMonthly):'';
+    el('passiveHint').textContent = passiveMonthly>=3000 ? ('被動收入 '+fmt(passiveMonthly)+'/月 已破 3,000，計入合計。') : ('被動收入 '+fmt(passiveMonthly)+'/月，未達 3,000 暫不計入合計。');
+    el('incomeTotal').textContent=fmt(incomeTotal);
+    el('expTotal').textContent=fmt(expTotal);
+    el('disposable').textContent=fmt(disposable);
+    el('target3').textContent=fmt(t3);
+
+    el('balBase').value=emergency?emergency:'';
+    el('balCash').value=cash?cash:'';
+    el('balMem').value=memOn&&memCost?memCost:'';
+
+    var totalMV=emergency+cash+num('balEtf')+(memOn?memCost:0)+num('balUsdt')+num('otherOpenBal');
+    el('totalMV').textContent=fmt(totalMV);
+    el('openMV').textContent=fmt(totalMV);
+
+    var pct=t3>0?Math.min(100,emergency/t3*100):0;
+    el('bar').style.width=pct+'%';
+    if(full){el('bar').style.background='var(--gold)'; setLamp('var(--gold-bg)','var(--gold)'); el('lamp').innerHTML='<i class="ti ti-star"></i>滿檔 · 多的挪去開源'; el('baseHint').textContent='地基已達 6 個月，很足！閒置太多會被通膨吃掉——多的錢建議挪去 ETF / 紀念品 / USDT 開源。';}
+    else if(green){el('bar').style.background='var(--green)'; setLamp('var(--green-bg)','var(--green)'); el('lamp').innerHTML='<i class="ti ti-circle-check"></i>綠燈 · 地基穩固'; el('baseHint').textContent='地基達 3 倍防線，穩！可分配的錢分流到 ETF、現金、USDT（6 個月是上限，超過就挪去開源）。';}
+    else if(unlocked){el('bar').style.background='var(--amber)'; setLamp('var(--amber-bg)','var(--amber)'); el('lamp').innerHTML='<i class="ti ti-alert-triangle"></i>黃燈 · 堪用'; el('baseHint').textContent='已達 1 個月、解鎖開源；建議續補到 3 倍（'+fmt(t3)+'）更穩。';}
+    else {el('bar').style.background='var(--red)'; setLamp('var(--red-bg)','var(--red)'); el('lamp').innerHTML='<i class="ti ti-alert-triangle"></i>紅燈 · 先補地基'; el('baseHint').textContent=expTotal>0?('至少要 1 個月（'+fmt(t1)+'）才解鎖開源，還差 '+fmt(Math.max(0,t1-emergency))):'先填收入與被動支出，才算得出地基防線。';}
+
+    var srcs=document.querySelectorAll('.src');
+    if(unlocked){
+      el('splitBox').style.opacity='1'; el('splitBox').style.pointerEvents='auto';
+      srcs.forEach(function(s){s.style.opacity='1';});
+      var e=num('sEtf'), c=num('sCash'), u=num('sUsdt'); var sum=e+c+u; if(sum===0){e=1;sum=1;}
+      el('amtBase').textContent=full?'滿檔':(green?'已達標':'堪用');
+      el('tagBase').textContent=full?'★ 滿檔':(green?'✓ 綠燈':'黃燈');
+      el('bkBase').style.borderColor=full?'var(--gold)':(green?'var(--green)':'var(--amber)');
+      el('amtEtf').textContent=fmt(disposable*e/sum); el('pctEtf').textContent=Math.round(e/sum*100)+'%';
+      el('amtCash').textContent=fmt(disposable*c/sum); el('pctCash').textContent=Math.round(c/sum*100)+'%';
+      el('amtUsdt').textContent=fmt(disposable*u/sum); el('pctUsdt').textContent=Math.round(u/sum*100)+'%';
+      el('oEtf').textContent=num('sEtf')+'%'; el('oCash').textContent=num('sCash')+'%'; el('oUsdt').textContent=num('sUsdt')+'%';
+    } else {
+      el('splitBox').style.opacity='.45'; el('splitBox').style.pointerEvents='none';
+      srcs.forEach(function(s){s.style.opacity='.4';});
+      el('bkBase').style.borderColor='var(--red)';
+      el('amtBase').textContent=fmt(disposable); el('tagBase').textContent='全額補地基';
+      el('amtEtf').textContent='鎖定'; el('pctEtf').textContent='—';
+      el('amtCash').textContent='鎖定'; el('pctCash').textContent='—';
+      el('amtUsdt').textContent='鎖定'; el('pctUsdt').textContent='—';
+    }
+
+    el('incBase').textContent=fmt(iBase/12);
+    el('incCash').textContent=fmt(iCash/12);
+    el('incEtf').textContent=fmt(iEtf/12);
+    el('incMem').textContent=memOn?fmt(MEM_YEAR/12):'未參與';
+    el('incUsdt').textContent=fmt(iUsdt/12);
+    el('incOther').textContent=fmt(iOther/12);
+    var actMonthly=num('actBase')+num('actCash')+num('actEtf')+num('actMem')+num('actUsdt')+num('actOther');
+    el('monthlyPassive').textContent=fmt(passiveMonthly);
+    el('monthlyActual').textContent=fmt(actMonthly);
+    el('passiveBar').style.width=Math.min(100,passiveMonthly/30000*100)+'%';
+    LAST.est=passiveMonthly; LAST.act=actMonthly; LAST.mv=totalMV;
+
+    var etfMV=num('balEtf');
+    var unlockDebt=etfMV>=300000;
+    var unlockPledge=etfMV>=500000;
+    el('layer5').style.opacity=unlockDebt?'1':'.5';
+    // 良性負債區塊（ETF 破 30 萬）
+    el('secDebt').style.opacity=unlockDebt?'1':'.4';
+    el('secDebt').style.pointerEvents=unlockDebt?'auto':'none';
+    el('toolDebt').style.opacity=unlockDebt?'1':'.4';
+    el('debtLockTag').style.display=unlockDebt?'none':'inline';
+    // 股票質押區塊（ETF 破 50 萬）
+    el('secPledge').style.opacity=unlockPledge?'1':'.4';
+    el('secPledge').style.pointerEvents=unlockPledge?'auto':'none';
+    el('toolPledge').style.opacity=unlockPledge?'1':'.4';
+    el('toolLev').style.opacity=unlockPledge?'1':'.4';
+    el('pledgeLockTag').style.display=unlockPledge?'none':'inline';
+    var bl=el('boostLock');
+    if(unlockPledge){bl.style.background='var(--green-bg)'; bl.style.color='var(--green)'; bl.innerHTML='<i class="ti ti-lock-open"></i>全解鎖'; el('boostHint').textContent='ETF 配置已破 50 萬 — 良性負債與股票質押皆可上場（務必留安全邊際）。';}
+    else if(unlockDebt){bl.style.background='var(--amber-bg)'; bl.style.color='var(--amber)'; bl.innerHTML='<i class="ti ti-lock-open"></i>良性負債已解鎖'; el('boostHint').textContent='ETF 已破 30 萬 — 良性負債解鎖；再到 50 萬解鎖股票質押（還差 '+fmt(Math.max(0,500000-etfMV))+'）。';}
+    else {bl.style.background='var(--surface2)'; bl.style.color='var(--muted)'; bl.innerHTML='<i class="ti ti-lock"></i>ETF 滿 30 萬解鎖'; el('boostHint').textContent='ETF 配置破 30 萬解鎖良性負債、破 50 萬解鎖股票質押 — 還差 '+fmt(Math.max(0,300000-etfMV))+' 到 30 萬。';}
+
+    var pledgeLoan=num('pledgeLoan'), stockMV=num('stockMV');
+    if(pledgeLoan>0){
+      var mr=stockMV/pledgeLoan*100;
+      el('maintRatio').textContent=Math.round(mr)+'%';
+      el('maintBar').style.width=Math.min(100,mr/300*100)+'%';
+      var mok=mr>=300, mwarn=mr>=200;
+      var mc=mok?'var(--green)':(mwarn?'var(--amber)':'var(--red)');
+      el('maintRatio').style.color=mc; el('maintBar').style.background=mc;
+      el('maintHint').textContent=mok?('維持率 '+Math.round(mr)+'%，安全。'):(mwarn?('維持率 '+Math.round(mr)+'%，留意 — 接近 200% 要準備補擔保或還款。'):('維持率 '+Math.round(mr)+'%，危險！166% 是追繳／斷頭線，快補擔保或還款。'));
+    } else { el('maintRatio').textContent='—'; el('maintBar').style.width='0%'; el('maintHint').textContent='填股票總市值與質押借款，自動算維持率（≥300% 安全、200% 留意、166% 危險／斷頭線）。'; }
+
+    var totalDebt=num('debtMortgage')+num('debtCredit')+pledgeLoan;
+    if(totalMV>0){
+      var dr=totalDebt/totalMV*100;
+      el('equityRatio').textContent=Math.round(dr)+'%';
+      el('equityBar').style.width=Math.min(100,dr)+'%';
+      var dcol, dmsg;
+      if(dr>65){dcol='var(--red)'; dmsg='危險（'+Math.round(dr)+'%）：資產大半是借來的，貼近 75~80% 隨時有破產風險 — 快降負債。';}
+      else if(dr>50){dcol='var(--amber)'; dmsg='警戒（'+Math.round(dr)+'%）：槓桿偏高，收入中斷或大跌容易出事，壓回 50% 以下較穩。';}
+      else if(dr>=20){dcol='var(--green)'; dmsg='理想（'+Math.round(dr)+'%）：安全區 20~50%，約 30% 最舒服。';}
+      else {dcol='var(--green)'; dmsg='偏保守（'+Math.round(dr)+'%）：槓桿很低、很安全；想加速可適度運用，30% 左右最舒服。';}
+      el('equityRatio').style.color=dcol; el('equityBar').style.background=dcol;
+      el('equityHint').textContent=dmsg;
+    } else { el('equityRatio').textContent='—'; el('equityBar').style.width='0%'; }
+
+    save(false);
+  }
+
+  fields.forEach(function(f){el(f).addEventListener('input',render); if(f==='memOn') el(f).addEventListener('change',render);});
+  document.querySelectorAll('.nav button').forEach(function(b){b.addEventListener('click',function(){var t=el(b.getAttribute('data-go')); if(t) t.scrollIntoView({behavior:'smooth',block:'start'});});});
+  el('saveBtn').addEventListener('click',function(){save(true);});
+  el('recordBtn').addEventListener('click',recordMonth);
+
+  // ── 亮色／暗色切換（記在 localStorage，下次開啟沿用）──
+  var TKEY='dex_asset_flow_theme';
+  function applyTheme(t){
+    var dark=(t==='dark');
+    document.documentElement.setAttribute('data-theme', dark?'dark':'light');
+    el('themeBtn').innerHTML = dark ? '<i class="ti ti-sun"></i> 切換亮色' : '<i class="ti ti-moon"></i> 切換暗色';
+    renderChart();   // 圖表顏色跟著主題重畫
+  }
+  try{ applyTheme(localStorage.getItem(TKEY)||'light'); }catch(e){ applyTheme('light'); }
+  el('themeBtn').addEventListener('click',function(){
+    var next = document.documentElement.getAttribute('data-theme')==='dark' ? 'light' : 'dark';
+    applyTheme(next);
+    try{ localStorage.setItem(TKEY,next); }catch(e){}
+  });
+  el('pdfBtn').addEventListener('click',function(){
+    // 瀏覽器內建列印 → 選「另存為 PDF / Save as PDF」，離線、file:// 直接開都不會失敗
+    var d=new Date(), p=function(x){return (x<10?'0':'')+x;};
+    var stamp=d.getFullYear()+p(d.getMonth()+1)+p(d.getDate());
+    var oldTitle=document.title;
+    document.title='Dex資產分流防錯系統_'+stamp;   // 存檔時的預設檔名
+    window.print();
+    setTimeout(function(){document.title=oldTitle;},1000);
+  });
+  el('clearRecs').addEventListener('click',function(){ if(confirm('確定清空所有每月追蹤紀錄？')){ saveRecs([]); renderChart(); } });
+  el('resetBtn').addEventListener('click',function(){
+    fields.forEach(function(f){ if(f==='memOn') el(f).checked=false; else el(f).value=''; });
+    el('sEtf').value=60; el('sCash').value=20; el('sUsdt').value=20;
+    try{localStorage.removeItem(KEY);}catch(e){}
+    el('savedAt').textContent='尚未儲存';
+    render();
+  });
+
+  var td=new Date();
+  el('todayDate').textContent=td.getFullYear()+'/'+('0'+(td.getMonth()+1)).slice(-2)+'/'+('0'+td.getDate()).slice(-2);
+
+  load();
+  render();
+  renderChart();
+})();
+</script>
+</body>
+</html>
