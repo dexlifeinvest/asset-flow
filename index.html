@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Dex 資產分流防錯系統</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' shape-rendering='crispEdges'%3E%3Crect width='16' height='16' rx='3' fill='%230f1c2e'/%3E%3Crect x='7' y='2' width='2' height='3' fill='%233d8bf5'/%3E%3Crect x='2' y='5' width='12' height='2' fill='%233d8bf5'/%3E%3Crect x='2' y='7' width='2' height='2' fill='%233d8bf5'/%3E%3Crect x='7' y='7' width='2' height='2' fill='%233d8bf5'/%3E%3Crect x='12' y='7' width='2' height='2' fill='%233d8bf5'/%3E%3Crect x='1' y='10' width='4' height='4' fill='%231f9d63'/%3E%3Crect x='6' y='10' width='4' height='4' fill='%233d8bf5'/%3E%3Crect x='11' y='10' width='4' height='4' fill='%23c9922a'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.11.0/dist/tabler-icons.min.css">
 <style>
 :root{
@@ -60,6 +61,17 @@ input{width:100%; background:var(--surface2); border:1px solid var(--line); bord
 input::placeholder{color:var(--faint);}
 input:focus{outline:none; border-color:var(--accent);}
 input[readonly]{opacity:.6;}
+select{width:100%; background:var(--surface2); border:1px solid var(--line); border-radius:8px; color:var(--text); padding:8px 10px; font-size:14px; font-family:inherit; margin-top:4px;}
+select:focus{outline:none; border-color:var(--accent);}
+.exrow{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:8px;}
+.exrow select,.exrow input{margin-top:0;}
+.exrow select{flex:1 1 170px;}
+.exrow .exname{flex:1 1 140px;}
+.exrow .exval{flex:0 0 118px;}
+.exdel{flex:0 0 34px; width:34px; height:36px; background:var(--surface2); border:1px solid var(--line); border-radius:8px; color:var(--muted); font-size:14px; cursor:pointer; font-family:inherit; line-height:1;}
+.exdel:hover{border-color:var(--red); color:var(--red);}
+.addbtn{background:var(--accent-bg); border:1px dashed var(--accent); color:var(--accent); border-radius:8px; padding:8px 14px; font-size:13px; font-weight:600; cursor:pointer; font-family:inherit; margin:2px 0 14px;}
+.addbtn:hover{background:var(--accent); color:var(--onaccent); border-style:solid;}
 .grid3{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin-bottom:12px;}
 .grid2{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px;}
 .metrics{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px;}
@@ -154,6 +166,7 @@ input[type=range]::-moz-range-thumb{width:18px; height:18px; border:none; border
 .chart .col .cap{font-size:10px; color:var(--faint); margin-top:2px;}
 @media(max-width:560px){
   .grid3{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .exrow .exval{flex:1 1 100px;}
   .buckets{grid-template-columns:repeat(2,minmax(0,1fr));}
   .metrics{grid-template-columns:1fr;}
 }
@@ -175,6 +188,8 @@ input[type=range]::-moz-range-thumb{width:18px; height:18px; border:none; border
   html[data-theme="dark"] .metric .v{color:#fff !important;}
   body{background:#fff !important; padding:0 8px !important;}
   .topbar{display:none !important;}
+  .addbtn,.exdel{display:none !important;}
+  select{-webkit-appearance:none; appearance:none;}
   .wrap{gap:16px;}
   .wrap > *{transform:none !important; box-shadow:none !important;}
   .card,.ban,.metrics{page-break-inside:avoid;}
@@ -242,12 +257,20 @@ input[type=range]::-moz-range-thumb{width:18px; height:18px; border:none; border
       <label class="f">影音串流<input type="number" class="exp" id="media" min="0" step="50" placeholder="0"></label>
     </div>
     <div class="sec">家庭與生活</div>
-    <div class="grid3">
+    <div class="grid2" style="margin-bottom:12px;">
       <label class="f">孝親費<input type="number" class="exp" id="parents" min="0" step="500" placeholder="0"></label>
       <label class="f">育兒費<input type="number" class="exp" id="kids" min="0" step="500" placeholder="0"></label>
-      <label class="f">雜費（網路/水電/保險/各項APP訂閱費）<input type="number" class="exp" id="misc" min="0" step="100" placeholder="0"></label>
     </div>
-    <div class="sec">其他</div>
+    <div class="sec">居家固定費</div>
+    <div class="grid3">
+      <label class="f">網路／寬頻<input type="number" class="exp" id="net" min="0" step="100" placeholder="0"></label>
+      <label class="f">保險費（年繳請除以 12）<input type="number" class="exp" id="insurance" min="0" step="500" placeholder="0"></label>
+      <label class="f">雜費（水電瓦斯／其他零星）<input type="number" class="exp" id="misc" min="0" step="100" placeholder="0"></label>
+    </div>
+    <div class="sec">其他支出（從下拉選單挑，可新增多筆）</div>
+    <div id="extraRows"></div>
+    <button type="button" class="addbtn" id="addExtra"><i class="ti ti-plus"></i> 新增一項支出</button>
+    <div class="sec">其他（自訂項目名稱）</div>
     <div class="grid2">
       <input type="text" id="otherLabel" placeholder="自訂項目名稱">
       <input type="number" class="exp" id="other" min="0" step="100" placeholder="0">
@@ -376,16 +399,72 @@ input[type=range]::-moz-range-thumb{width:18px; height:18px; border:none; border
 <script>
 (function(){
   var KEY='dex_asset_flow';
-  var fields=['active','mortgage','credit','pledge','yt','ai','media','parents','kids','misc','otherLabel','other','emergency','cash','balEtf','balUsdt','memOn','memCost','otherOpenBal','otherOpenRate','actBase','actCash','actEtf','actMem','actUsdt','actOther','stockMV','pledgeLoan','debtMortgage','debtCredit','sEtf','sCash','sUsdt'];
+  // 常見的家庭／上班族每月必要支出（已列在上方的項目不重複收錄）
+  var EXTRA_OPTS=[
+    ['住房', ['房租','社區管理費／停車位']],
+    ['交通', ['車貸','汽機車開銷（油資・保養・牌照稅）']],
+    ['債務與稅', ['學貸','稅金月攤（所得稅・房屋稅）']],
+    ['家庭', ['補習與才藝費','長輩照護／看護費','寵物開銷（飼料・醫療）']],
+    ['個人', ['手機門號（電信月租）','醫療與健康（回診・藥品・健檢）','進修學習（課程・證照）']]
+  ];
+  var fields=['active','mortgage','credit','pledge','yt','ai','media','parents','kids','net','insurance','misc','otherLabel','other','emergency','cash','balEtf','balUsdt','memOn','memCost','otherOpenBal','otherOpenRate','actBase','actCash','actEtf','actMem','actUsdt','actOther','stockMV','pledgeLoan','debtMortgage','debtCredit','sEtf','sCash','sUsdt'];
   var fmt=function(n){return 'NT$'+Math.round(n||0).toLocaleString('en-US');};
   var el=function(id){return document.getElementById(id);};
   var num=function(id){var v=parseFloat(el(id).value);return isNaN(v)?0:Math.max(0,v);};
   var R={base:0.015, cash:0.015, etf:0.08, usdt:0.06};
   var MEM_YEAR=20000;
 
-  function load(){try{var s=JSON.parse(localStorage.getItem(KEY)||'{}');fields.forEach(function(f){if(s[f]===undefined||s[f]===null)return; if(f==='memOn'){el(f).checked=(s[f]==='1'||s[f]===true);} else {el(f).value=s[f];}}); if(s.__savedAt) el('savedAt').textContent='已儲存 '+s.__savedAt;}catch(e){}}
+  function load(){try{var s=JSON.parse(localStorage.getItem(KEY)||'{}');fields.forEach(function(f){if(s[f]===undefined||s[f]===null)return; if(f==='memOn'){el(f).checked=(s[f]==='1'||s[f]===true);} else {el(f).value=s[f];}}); if(s.__extras&&s.__extras.length){el('extraRows').innerHTML=''; s.__extras.forEach(function(d){addRow(d);});} if(s.__savedAt) el('savedAt').textContent='已儲存 '+s.__savedAt;}catch(e){}}
   function stamp(){var d=new Date();var p=function(x){return (x<10?'0':'')+x;};return p(d.getMonth()+1)+'/'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes())+':'+p(d.getSeconds());}
-  function save(withStamp){var s={};fields.forEach(function(f){s[f]=(f==='memOn')?(el(f).checked?'1':'0'):el(f).value;}); if(withStamp){s.__savedAt=stamp(); el('savedAt').textContent='已儲存 '+s.__savedAt;} else {try{var old=JSON.parse(localStorage.getItem(KEY)||'{}'); if(old.__savedAt) s.__savedAt=old.__savedAt;}catch(e){}} try{localStorage.setItem(KEY,JSON.stringify(s));}catch(e){}}
+  function save(withStamp){var s={};fields.forEach(function(f){s[f]=(f==='memOn')?(el(f).checked?'1':'0'):el(f).value;}); s.__extras=extrasData(); if(withStamp){s.__savedAt=stamp(); el('savedAt').textContent='已儲存 '+s.__savedAt;} else {try{var old=JSON.parse(localStorage.getItem(KEY)||'{}'); if(old.__savedAt) s.__savedAt=old.__savedAt;}catch(e){}} try{localStorage.setItem(KEY,JSON.stringify(s));}catch(e){}}
+  // ── 其他支出：可新增的下拉選單列 ──
+  function optionsHTML(){
+    var h='<option value="">— 選擇支出項目 —</option>';
+    EXTRA_OPTS.forEach(function(g){
+      h+='<option disabled>── '+g[0]+' ──</option>';
+      g[1].forEach(function(n){ h+='<option value="'+n+'">'+n+'</option>'; });
+    });
+    h+='<option value="__custom">其他（自行輸入名稱）</option>';
+    return h;
+  }
+  function syncRow(row){
+    var sel=row.querySelector('.exsel'), nm=row.querySelector('.exname');
+    nm.style.display=(sel.value==='__custom')?'':'none';
+    if(sel.value!=='__custom') nm.value='';
+  }
+  function addRow(data){
+    var row=document.createElement('div');
+    row.className='exrow';
+    row.innerHTML='<select class="exsel">'+optionsHTML()+'</select>'
+      +'<input type="text" class="exname" placeholder="自訂項目名稱" style="display:none">'
+      +'<input type="number" class="exval" min="0" step="100" placeholder="0">'
+      +'<button type="button" class="exdel" title="刪除這一列">&#10005;</button>';
+    el('extraRows').appendChild(row);
+    // 舊版存檔的選項名稱對照（改名後仍能還原）
+    var ALIAS={'手機門號／電信費':'手機門號（電信月租）'};
+    if(data){ if(ALIAS[data.k]) data.k=ALIAS[data.k]; row.querySelector('.exsel').value=data.k||''; row.querySelector('.exname').value=data.n||''; row.querySelector('.exval').value=(data.v===undefined?'':data.v); }
+    syncRow(row);
+    row.querySelector('.exsel').addEventListener('change',function(){syncRow(row); save(false); render();});
+    row.querySelector('.exname').addEventListener('input',function(){save(false);});
+    row.querySelector('.exval').addEventListener('input',function(){save(false); render();});
+    row.querySelector('.exdel').addEventListener('click',function(){row.parentNode.removeChild(row); save(false); render();});
+    return row;
+  }
+  function extrasData(){
+    var a=[];
+    document.querySelectorAll('#extraRows .exrow').forEach(function(r){
+      a.push({k:r.querySelector('.exsel').value, n:r.querySelector('.exname').value, v:r.querySelector('.exval').value});
+    });
+    return a;
+  }
+  function extrasTotal(){
+    var t=0;
+    document.querySelectorAll('#extraRows .exval').forEach(function(i){
+      var v=parseFloat(i.value); if(!isNaN(v)) t+=Math.max(0,v);
+    });
+    return t;
+  }
+
   function setLamp(bg,col){var l=el('lamp');l.style.background=bg;l.style.color=col;}
 
   var RKEY='dex_asset_flow_records';
@@ -411,7 +490,7 @@ input[type=range]::-moz-range-thumb{width:18px; height:18px; border:none; border
 
   function render(){
     var active=num('active');
-    var expTotal=num('mortgage')+num('credit')+num('pledge')+num('yt')+num('ai')+num('media')+num('parents')+num('kids')+num('misc')+num('other');
+    var expTotal=num('mortgage')+num('credit')+num('pledge')+num('yt')+num('ai')+num('media')+num('parents')+num('kids')+num('net')+num('insurance')+num('misc')+num('other')+extrasTotal();
     var emergency=num('emergency'), cash=num('cash');
     var memOn=el('memOn').checked, memCost=num('memCost');
 
@@ -563,6 +642,7 @@ input[type=range]::-moz-range-thumb{width:18px; height:18px; border:none; border
   el('resetBtn').addEventListener('click',function(){
     fields.forEach(function(f){ if(f==='memOn') el(f).checked=false; else el(f).value=''; });
     el('sEtf').value=60; el('sCash').value=20; el('sUsdt').value=20;
+    el('extraRows').innerHTML='';
     try{localStorage.removeItem(KEY);}catch(e){}
     el('savedAt').textContent='尚未儲存';
     render();
@@ -570,6 +650,8 @@ input[type=range]::-moz-range-thumb{width:18px; height:18px; border:none; border
 
   var td=new Date();
   el('todayDate').textContent=td.getFullYear()+'/'+('0'+(td.getMonth()+1)).slice(-2)+'/'+('0'+td.getDate()).slice(-2);
+
+  el('addExtra').addEventListener('click',function(){ addRow(); save(false); });
 
   load();
   render();
