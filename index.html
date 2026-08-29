@@ -233,8 +233,8 @@ input[type=range]::-moz-range-thumb{width:18px; height:18px; border:none; border
       <span class="sum">合計 <b id="incomeTotal">NT$0</b></span>
     </div>
     <div class="grid2">
-      <label class="f">主動收入（薪水等）<input type="number" id="active" min="0" step="1000" placeholder="60000"></label>
-      <label class="f">被動收入（自動帶入第4層）<input type="number" id="passiveShow" readonly placeholder="0"></label>
+      <label class="f">主動收入（薪水等）<input class="money" type="text" inputmode="numeric" id="active" placeholder="60000"></label>
+      <label class="f">被動收入（自動帶入第4層）<input class="money" type="text" inputmode="numeric" id="passiveShow" readonly placeholder="0"></label>
     </div>
     <div class="hint" id="passiveHint">被動收入由第 4 層開源自動帶入；超過 3,000/月 才計入合計，代表你開始站穩被動現金流。</div>
   </div>
@@ -246,26 +246,26 @@ input[type=range]::-moz-range-thumb{width:18px; height:18px; border:none; border
     </div>
     <div class="sec">貸款</div>
     <div class="grid3">
-      <label class="f">房貸<input type="number" class="exp" id="mortgage" min="0" step="500" placeholder="0"></label>
-      <label class="f">信貸<input type="number" class="exp" id="credit" min="0" step="500" placeholder="0"></label>
-      <label class="f">股票質押<input type="number" class="exp" id="pledge" min="0" step="500" placeholder="0"></label>
+      <label class="f">房貸<input type="text" inputmode="numeric" class="exp money" id="mortgage" placeholder="0"></label>
+      <label class="f">信貸<input type="text" inputmode="numeric" class="exp money" id="credit" placeholder="0"></label>
+      <label class="f">股票質押<input type="text" inputmode="numeric" class="exp money" id="pledge" placeholder="0"></label>
     </div>
     <div class="sec">訂閱費</div>
     <div class="grid3">
-      <label class="f">YouTube<input type="number" class="exp" id="yt" min="0" step="50" placeholder="0"></label>
-      <label class="f">AI 工具<input type="number" class="exp" id="ai" min="0" step="50" placeholder="0"></label>
-      <label class="f">影音串流<input type="number" class="exp" id="media" min="0" step="50" placeholder="0"></label>
+      <label class="f">YouTube<input type="text" inputmode="numeric" class="exp money" id="yt" placeholder="0"></label>
+      <label class="f">AI 工具<input type="text" inputmode="numeric" class="exp money" id="ai" placeholder="0"></label>
+      <label class="f">影音串流<input type="text" inputmode="numeric" class="exp money" id="media" placeholder="0"></label>
     </div>
     <div class="sec">家庭與生活</div>
     <div class="grid2" style="margin-bottom:12px;">
-      <label class="f">孝親費<input type="number" class="exp" id="parents" min="0" step="500" placeholder="0"></label>
-      <label class="f">育兒費<input type="number" class="exp" id="kids" min="0" step="500" placeholder="0"></label>
+      <label class="f">孝親費<input type="text" inputmode="numeric" class="exp money" id="parents" placeholder="0"></label>
+      <label class="f">育兒費<input type="text" inputmode="numeric" class="exp money" id="kids" placeholder="0"></label>
     </div>
     <div class="sec">居家固定費</div>
     <div class="grid3">
-      <label class="f">網路／寬頻<input type="number" class="exp" id="net" min="0" step="100" placeholder="0"></label>
-      <label class="f">保險費（年繳請除以 12）<input type="number" class="exp" id="insurance" min="0" step="500" placeholder="0"></label>
-      <label class="f">雜費（水電瓦斯／其他零星）<input type="number" class="exp" id="misc" min="0" step="100" placeholder="0"></label>
+      <label class="f">網路／寬頻<input type="text" inputmode="numeric" class="exp money" id="net" placeholder="0"></label>
+      <label class="f">保險費（年繳請除以 12）<input type="text" inputmode="numeric" class="exp money" id="insurance" placeholder="0"></label>
+      <label class="f">雜費（水電瓦斯／其他零星）<input type="text" inputmode="numeric" class="exp money" id="misc" placeholder="0"></label>
     </div>
     <div class="sec">其他支出（從下拉選單挑，可新增多筆）</div>
     <div id="extraRows"></div>
@@ -273,7 +273,7 @@ input[type=range]::-moz-range-thumb{width:18px; height:18px; border:none; border
     <div class="sec">其他（自訂項目名稱）</div>
     <div class="grid2">
       <input type="text" id="otherLabel" placeholder="自訂項目名稱">
-      <input type="number" class="exp" id="other" min="0" step="100" placeholder="0">
+      <input type="text" inputmode="numeric" class="exp money" id="other" placeholder="0">
     </div>
   </div>
 
@@ -289,8 +289,8 @@ input[type=range]::-moz-range-thumb{width:18px; height:18px; border:none; border
       <span class="lamp" id="lamp"><i class="ti ti-alert-triangle"></i>未達標</span>
     </div>
     <div class="grid2" style="margin-bottom:12px;">
-      <label class="f">緊急預備金（建議 3~6 個月）<input type="number" id="emergency" min="0" step="1000" placeholder="至少 1 個月"></label>
-      <label class="f">現金（活用週轉，與預備金分開）<input type="number" id="cash" min="0" step="1000" placeholder="日常週轉現金"></label>
+      <label class="f">緊急預備金（建議 3~6 個月）<input class="money" type="text" inputmode="numeric" id="emergency" placeholder="至少 1 個月"></label>
+      <label class="f">現金（活用週轉，與預備金分開）<input class="money" type="text" inputmode="numeric" id="cash" placeholder="日常週轉現金"></label>
     </div>
     <div class="bar"><div id="bar"></div></div>
     <div class="hint" id="baseHint">緊急預備金建議 3~6 個月：達 1 個月解鎖開源、3 個月亮綠燈；到 6 個月會提醒你地基夠厚、多的錢該挪去開源。</div>
@@ -303,7 +303,7 @@ input[type=range]::-moz-range-thumb{width:18px; height:18px; border:none; border
       <div class="bk" id="bkBase"><i class="ti ti-shield-half"></i><div class="n">緊急預備金</div><div class="a" id="amtBase">NT$0</div><div class="p" id="tagBase">補地基中</div></div>
       <div class="bk src" id="bkCash"><i class="ti ti-wallet"></i><div class="n">現金</div><div class="a" id="amtCash">NT$0</div><div class="p" id="pctCash">20%</div></div>
       <div class="bk src" id="bkEtf"><i class="ti ti-chart-line"></i><div class="n">ETF 配置</div><div class="a" id="amtEtf">NT$0</div><div class="p" id="pctEtf">60%</div></div>
-      <div class="bk" id="bkMem"><i class="ti ti-gift"></i><div class="n">股東紀念品</div><label class="memchk"><input type="checkbox" id="memOn"> 參與</label><input type="number" id="memCost" class="cost" min="0" step="1000" placeholder="成本 40000"></div>
+      <div class="bk" id="bkMem"><i class="ti ti-gift"></i><div class="n">股東紀念品</div><label class="memchk"><input type="checkbox" id="memOn"> 參與</label><input type="text" inputmode="numeric" id="memCost" class="cost money" placeholder="成本 40000"></div>
       <div class="bk src" id="bkUsdt"><i class="ti ti-coin"></i><div class="n">USDT 理財</div><div class="a" id="amtUsdt">NT$0</div><div class="p" id="pctUsdt">20%</div></div>
     </div>
     <div class="note"><i class="ti ti-transfer"></i><span>ETF 配置滿 1 張（1000 股）就能把股票借出去，多賺一筆借券收入。股東紀念品是一次性成本、每年回饋，打勾參與即可。</span></div>
@@ -331,12 +331,13 @@ input[type=range]::-moz-range-thumb{width:18px; height:18px; border:none; border
     <div class="hd"><div class="l"><i class="ti ti-coins"></i><span class="t">第 4 層 · 開源收入（月）</span></div></div>
     <div class="sec" style="margin-top:-4px;">左欄市值×假設利率÷12＝每月預估；右欄「實際」每月自己算好 key 進去，養成每月追蹤習慣。</div>
     <div class="ihead"><span class="in">項目</span><span class="c1">市值</span><span class="rt">利率</span><span class="iv">預估/月</span><span class="act">實際/月</span></div>
-    <div class="irow"><span class="in">緊急預備金</span><input type="number" id="balBase" readonly placeholder="市值"><span class="rt">1.5%</span><span class="iv" id="incBase">NT$0</span><input type="number" class="act" id="actBase" min="0" step="100" placeholder="實際"></div>
-    <div class="irow"><span class="in">現金</span><input type="number" id="balCash" readonly placeholder="市值"><span class="rt">1.5%</span><span class="iv" id="incCash">NT$0</span><input type="number" class="act" id="actCash" min="0" step="100" placeholder="實際"></div>
-    <div class="irow"><span class="in">ETF 配置</span><input type="number" id="balEtf" min="0" step="1000" placeholder="市值"><span class="rt">8%</span><span class="iv" id="incEtf">NT$0</span><input type="number" class="act" id="actEtf" min="0" step="100" placeholder="實際"></div>
-    <div class="irow"><span class="in">股東紀念品 🎫🧼🧴</span><input type="number" id="balMem" readonly placeholder="＝成本"><span class="rt">回饋</span><span class="iv" id="incMem">NT$0</span><input type="number" class="act" id="actMem" min="0" step="100" placeholder="實際"></div>
-    <div class="irow"><span class="in">USDT 理財</span><input type="number" id="balUsdt" min="0" step="1000" placeholder="市值"><span class="rt">6%</span><span class="iv" id="incUsdt">NT$0</span><input type="number" class="act" id="actUsdt" min="0" step="100" placeholder="實際"></div>
-    <div class="irow" style="margin-bottom:12px;"><span class="in">其他開源</span><input type="number" id="otherOpenBal" min="0" step="1000" placeholder="市值"><span class="rt"><input type="number" id="otherOpenRate" min="0" step="0.5" placeholder="%"></span><span class="iv" id="incOther">NT$0</span><input type="number" class="act" id="actOther" min="0" step="100" placeholder="實際"></div>
+    <div class="irow"><span class="in">緊急預備金</span><input class="money" type="text" inputmode="numeric" id="balBase" readonly placeholder="市值"><span class="rt">1.5%</span><span class="iv" id="incBase">NT$0</span><input type="text" inputmode="numeric" class="act money" id="actBase" placeholder="實際"></div>
+    <div class="irow"><span class="in">現金</span><input class="money" type="text" inputmode="numeric" id="balCash" readonly placeholder="市值"><span class="rt">1.5%</span><span class="iv" id="incCash">NT$0</span><input type="text" inputmode="numeric" class="act money" id="actCash" placeholder="實際"></div>
+    <div class="irow"><span class="in">ETF 加個股</span><input class="money" type="text" inputmode="numeric" id="balEtf" placeholder="市值"><span class="rt">8%</span><span class="iv" id="incEtf">NT$0</span><input type="text" inputmode="numeric" class="act money" id="actEtf" placeholder="實際"></div>
+    <div class="irow"><span class="in">股東紀念品 🎫🧼🧴</span><input class="money" type="text" inputmode="numeric" id="balMem" readonly placeholder="＝成本"><span class="rt">回饋</span><span class="iv" id="incMem">NT$0</span><input type="text" inputmode="numeric" class="act money" id="actMem" placeholder="實際"></div>
+    <div class="irow"><span class="in">USDT 理財</span><input class="money" type="text" inputmode="numeric" id="balUsdt" placeholder="市值"><span class="rt">6%</span><span class="iv" id="incUsdt">NT$0</span><input type="text" inputmode="numeric" class="act money" id="actUsdt" placeholder="實際"></div>
+    <div class="irow"><span class="in">房產收入</span><input class="money" type="text" inputmode="numeric" id="houseBal" placeholder="市值"><span class="rt"><input type="number" id="houseRate" min="0" step="0.5" value="2" placeholder="%"></span><span class="iv" id="incHouse">NT$0</span><input type="text" inputmode="numeric" class="act money" id="actHouse" placeholder="實際"></div>
+    <div class="irow" style="margin-bottom:12px;"><span class="in">其他開源</span><input class="money" type="text" inputmode="numeric" id="otherOpenBal" placeholder="市值"><span class="rt"><input type="number" id="otherOpenRate" min="0" step="0.5" placeholder="%"></span><span class="iv" id="incOther">NT$0</span><input type="text" inputmode="numeric" class="act money" id="actOther" placeholder="實際"></div>
     <div class="mv"><span class="sec" style="margin:0;">開源總市值約</span><span class="v" id="openMV">NT$0</span></div>
     <div class="total" style="margin-top:8px;"><span class="sec" style="margin:0;">月被動 · 預估／實際／目標3萬</span><span class="v"><span id="monthlyPassive">NT$0</span> <span style="color:var(--muted); font-size:12px;">/</span> <span id="monthlyActual" style="color:var(--accent);">NT$0</span></span></div>
     <div class="bar" style="margin-top:8px; height:8px;"><div id="passiveBar" style="background:var(--green);"></div></div>
@@ -358,8 +359,8 @@ input[type=range]::-moz-range-thumb{width:18px; height:18px; border:none; border
       <div id="secDebt">
         <div class="rl"><span class="k">良性負債 · 本金餘額（房貸／信貸分開列）<span id="debtLockTag" style="font-size:11px; color:var(--muted);">🔒 ETF 滿 30 萬解鎖</span></span></div>
         <div class="grid2" style="margin-bottom:8px;">
-          <label class="f">房貸餘額<input type="number" id="debtMortgage" min="0" step="1000" placeholder="0"></label>
-          <label class="f">信貸餘額<input type="number" id="debtCredit" min="0" step="1000" placeholder="0"></label>
+          <label class="f">房貸餘額<input class="money" type="text" inputmode="numeric" id="debtMortgage" placeholder="0"></label>
+          <label class="f">信貸餘額<input class="money" type="text" inputmode="numeric" id="debtCredit" placeholder="0"></label>
         </div>
         <div class="rl" style="margin-top:14px;"><span class="k">資產負債比（負債 ÷ 開源總市值）</span><span class="v" id="equityRatio">—</span></div>
         <div class="bar" style="height:8px;"><div id="equityBar" style="background:var(--green);"></div></div>
@@ -369,8 +370,8 @@ input[type=range]::-moz-range-thumb{width:18px; height:18px; border:none; border
       <div id="secPledge" style="margin-top:16px; border-top:1px solid var(--line); padding-top:14px;">
         <div class="rl"><span class="k">股票質押 · 維持率 <span id="pledgeLockTag" style="font-size:11px; color:var(--muted);">🔒 ETF 滿 50 萬解鎖</span></span><span class="v" id="maintRatio">—</span></div>
         <div class="grid2" style="margin-bottom:8px;">
-          <label class="f">股票總市值（擔保品）<input type="number" id="stockMV" min="0" step="1000" placeholder="0"></label>
-          <label class="f">質押借款餘額<input type="number" id="pledgeLoan" min="0" step="1000" placeholder="0"></label>
+          <label class="f">股票總市值（擔保品）<input class="money" type="text" inputmode="numeric" id="stockMV" placeholder="0"></label>
+          <label class="f">質押借款餘額<input class="money" type="text" inputmode="numeric" id="pledgeLoan" placeholder="0"></label>
         </div>
         <div class="bar" style="height:8px;"><div id="maintBar" style="background:var(--green);"></div></div>
         <div class="hint" id="maintHint">填股票總市值與質押借款，自動算維持率（≥300% 安全、200% 留意、166% 危險／斷頭線）。</div>
@@ -407,14 +408,28 @@ input[type=range]::-moz-range-thumb{width:18px; height:18px; border:none; border
     ['家庭', ['補習與才藝費','長輩照護／看護費','寵物開銷（飼料・醫療）']],
     ['個人', ['手機門號（電信月租）','醫療與健康（回診・藥品・健檢）','進修學習（課程・證照）']]
   ];
-  var fields=['active','mortgage','credit','pledge','yt','ai','media','parents','kids','net','insurance','misc','otherLabel','other','emergency','cash','balEtf','balUsdt','memOn','memCost','otherOpenBal','otherOpenRate','actBase','actCash','actEtf','actMem','actUsdt','actOther','stockMV','pledgeLoan','debtMortgage','debtCredit','sEtf','sCash','sUsdt'];
+  var fields=['active','mortgage','credit','pledge','yt','ai','media','parents','kids','net','insurance','misc','otherLabel','other','emergency','cash','balEtf','balUsdt','memOn','memCost','houseBal','houseRate','otherOpenBal','otherOpenRate','actBase','actCash','actEtf','actMem','actUsdt','actHouse','actOther','stockMV','pledgeLoan','debtMortgage','debtCredit','sEtf','sCash','sUsdt'];
   var fmt=function(n){return 'NT$'+Math.round(n||0).toLocaleString('en-US');};
   var el=function(id){return document.getElementById(id);};
-  var num=function(id){var v=parseFloat(el(id).value);return isNaN(v)?0:Math.max(0,v);};
+  // ── 千分位：輸入與顯示都帶逗點，計算時再把逗點拿掉 ──
+  var toNum=function(v){var n=parseFloat(String(v==null?'':v).replace(/,/g,''));return isNaN(n)?0:n;};
+  var group=function(v){var t=String(v==null?'':v).replace(/[^\d.]/g,''); if(t==='')return ''; var q=t.split('.'); var i=q[0].replace(/\B(?=(\d{3})+(?!\d))/g,','); return q.length>1?i+'.'+q.slice(1).join('').slice(0,2):i;};
+  function fixCaret(inp){
+    var was=inp.value, pos=inp.selectionStart, now=group(was);
+    if(now===was) return;
+    var before=(was.slice(0,pos).match(/[\d.]/g)||[]).length;
+    inp.value=now;
+    var seen=0,k=0;
+    if(before>0){ for(;k<now.length;k++){ if(/[\d.]/.test(now[k])) seen++; if(seen>=before){k++;break;} } }
+    try{inp.setSelectionRange(k,k);}catch(e){}
+  }
+  function bindMoney(inp){ inp.addEventListener('input',function(){fixCaret(inp);}); }
+  function groupAll(){ document.querySelectorAll('input.money').forEach(function(i){ i.value=group(i.value); }); }
+  var num=function(id){return Math.max(0,toNum(el(id).value));};
   var R={base:0.015, cash:0.015, etf:0.08, usdt:0.06};
   var MEM_YEAR=20000;
 
-  function load(){try{var s=JSON.parse(localStorage.getItem(KEY)||'{}');fields.forEach(function(f){if(s[f]===undefined||s[f]===null)return; if(f==='memOn'){el(f).checked=(s[f]==='1'||s[f]===true);} else {el(f).value=s[f];}}); if(s.__extras&&s.__extras.length){el('extraRows').innerHTML=''; s.__extras.forEach(function(d){addRow(d);});} if(s.__savedAt) el('savedAt').textContent='已儲存 '+s.__savedAt;}catch(e){}}
+  function load(){try{var s=JSON.parse(localStorage.getItem(KEY)||'{}');fields.forEach(function(f){if(s[f]===undefined||s[f]===null)return; if(f==='memOn'){el(f).checked=(s[f]==='1'||s[f]===true);} else {el(f).value=s[f];}}); if(s.__extras&&s.__extras.length){el('extraRows').innerHTML=''; s.__extras.forEach(function(d){addRow(d);});} if(s.__savedAt) el('savedAt').textContent='已儲存 '+s.__savedAt; groupAll();}catch(e){}}
   function stamp(){var d=new Date();var p=function(x){return (x<10?'0':'')+x;};return p(d.getMonth()+1)+'/'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes())+':'+p(d.getSeconds());}
   function save(withStamp){var s={};fields.forEach(function(f){s[f]=(f==='memOn')?(el(f).checked?'1':'0'):el(f).value;}); s.__extras=extrasData(); if(withStamp){s.__savedAt=stamp(); el('savedAt').textContent='已儲存 '+s.__savedAt;} else {try{var old=JSON.parse(localStorage.getItem(KEY)||'{}'); if(old.__savedAt) s.__savedAt=old.__savedAt;}catch(e){}} try{localStorage.setItem(KEY,JSON.stringify(s));}catch(e){}}
   // ── 其他支出：可新增的下拉選單列 ──
@@ -437,12 +452,14 @@ input[type=range]::-moz-range-thumb{width:18px; height:18px; border:none; border
     row.className='exrow';
     row.innerHTML='<select class="exsel">'+optionsHTML()+'</select>'
       +'<input type="text" class="exname" placeholder="自訂項目名稱" style="display:none">'
-      +'<input type="number" class="exval" min="0" step="100" placeholder="0">'
+      +'<input type="text" inputmode="numeric" class="exval money" placeholder="0">'
       +'<button type="button" class="exdel" title="刪除這一列">&#10005;</button>';
     el('extraRows').appendChild(row);
     // 舊版存檔的選項名稱對照（改名後仍能還原）
     var ALIAS={'手機門號／電信費':'手機門號（電信月租）'};
     if(data){ if(ALIAS[data.k]) data.k=ALIAS[data.k]; row.querySelector('.exsel').value=data.k||''; row.querySelector('.exname').value=data.n||''; row.querySelector('.exval').value=(data.v===undefined?'':data.v); }
+    row.querySelector('.exval').value=group(row.querySelector('.exval').value);
+    bindMoney(row.querySelector('.exval'));
     syncRow(row);
     row.querySelector('.exsel').addEventListener('change',function(){syncRow(row); save(false); render();});
     row.querySelector('.exname').addEventListener('input',function(){save(false);});
@@ -460,7 +477,7 @@ input[type=range]::-moz-range-thumb{width:18px; height:18px; border:none; border
   function extrasTotal(){
     var t=0;
     document.querySelectorAll('#extraRows .exval').forEach(function(i){
-      var v=parseFloat(i.value); if(!isNaN(v)) t+=Math.max(0,v);
+      t+=Math.max(0,toNum(i.value));
     });
     return t;
   }
@@ -495,8 +512,9 @@ input[type=range]::-moz-range-thumb{width:18px; height:18px; border:none; border
     var memOn=el('memOn').checked, memCost=num('memCost');
 
     var iBase=emergency*R.base, iCash=cash*R.cash, iEtf=num('balEtf')*R.etf, iMem=memOn?MEM_YEAR:0, iUsdt=num('balUsdt')*R.usdt;
+    var iHouse=num('houseBal')*(num('houseRate')/100);
     var iOther=num('otherOpenBal')*(num('otherOpenRate')/100);
-    var annualPassive=iBase+iCash+iEtf+iMem+iUsdt+iOther;
+    var annualPassive=iBase+iCash+iEtf+iMem+iUsdt+iHouse+iOther;
     var passiveMonthly=annualPassive/12;
     var passiveCounted=passiveMonthly>=3000?passiveMonthly:0;
     var incomeTotal=active+passiveCounted;
@@ -506,18 +524,18 @@ input[type=range]::-moz-range-thumb{width:18px; height:18px; border:none; border
     var green=expTotal>0 && emergency>=t3;
     var full=expTotal>0 && emergency>=t6;
 
-    el('passiveShow').value=Math.round(passiveMonthly)?Math.round(passiveMonthly):'';
+    el('passiveShow').value=Math.round(passiveMonthly)?group(Math.round(passiveMonthly)):'';
     el('passiveHint').textContent = passiveMonthly>=3000 ? ('被動收入 '+fmt(passiveMonthly)+'/月 已破 3,000，計入合計。') : ('被動收入 '+fmt(passiveMonthly)+'/月，未達 3,000 暫不計入合計。');
     el('incomeTotal').textContent=fmt(incomeTotal);
     el('expTotal').textContent=fmt(expTotal);
     el('disposable').textContent=fmt(disposable);
     el('target3').textContent=fmt(t3);
 
-    el('balBase').value=emergency?emergency:'';
-    el('balCash').value=cash?cash:'';
-    el('balMem').value=memOn&&memCost?memCost:'';
+    el('balBase').value=emergency?group(emergency):'';
+    el('balCash').value=cash?group(cash):'';
+    el('balMem').value=memOn&&memCost?group(memCost):'';
 
-    var totalMV=emergency+cash+num('balEtf')+(memOn?memCost:0)+num('balUsdt')+num('otherOpenBal');
+    var totalMV=emergency+cash+num('balEtf')+(memOn?memCost:0)+num('balUsdt')+num('houseBal')+num('otherOpenBal');
     el('totalMV').textContent=fmt(totalMV);
     el('openMV').textContent=fmt(totalMV);
 
@@ -555,8 +573,9 @@ input[type=range]::-moz-range-thumb{width:18px; height:18px; border:none; border
     el('incEtf').textContent=fmt(iEtf/12);
     el('incMem').textContent=memOn?fmt(MEM_YEAR/12):'未參與';
     el('incUsdt').textContent=fmt(iUsdt/12);
+    el('incHouse').textContent=fmt(iHouse/12);
     el('incOther').textContent=fmt(iOther/12);
-    var actMonthly=num('actBase')+num('actCash')+num('actEtf')+num('actMem')+num('actUsdt')+num('actOther');
+    var actMonthly=num('actBase')+num('actCash')+num('actEtf')+num('actMem')+num('actUsdt')+num('actHouse')+num('actOther');
     el('monthlyPassive').textContent=fmt(passiveMonthly);
     el('monthlyActual').textContent=fmt(actMonthly);
     el('passiveBar').style.width=Math.min(100,passiveMonthly/30000*100)+'%';
@@ -610,6 +629,7 @@ input[type=range]::-moz-range-thumb{width:18px; height:18px; border:none; border
     save(false);
   }
 
+  document.querySelectorAll('input.money').forEach(bindMoney);
   fields.forEach(function(f){el(f).addEventListener('input',render); if(f==='memOn') el(f).addEventListener('change',render);});
   document.querySelectorAll('.nav button').forEach(function(b){b.addEventListener('click',function(){var t=el(b.getAttribute('data-go')); if(t) t.scrollIntoView({behavior:'smooth',block:'start'});});});
   el('saveBtn').addEventListener('click',function(){save(true);});
@@ -642,6 +662,7 @@ input[type=range]::-moz-range-thumb{width:18px; height:18px; border:none; border
   el('resetBtn').addEventListener('click',function(){
     fields.forEach(function(f){ if(f==='memOn') el(f).checked=false; else el(f).value=''; });
     el('sEtf').value=60; el('sCash').value=20; el('sUsdt').value=20;
+    el('houseRate').value=2;
     el('extraRows').innerHTML='';
     try{localStorage.removeItem(KEY);}catch(e){}
     el('savedAt').textContent='尚未儲存';
