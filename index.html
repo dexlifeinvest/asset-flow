@@ -164,6 +164,42 @@ input[type=range]::-moz-range-thumb{width:18px; height:18px; border:none; border
 .chart .col .b{width:26px; background:var(--accent); border-radius:6px 6px 0 0; transition:height .3s;}
 .chart .col .mo{font-size:11px; color:var(--muted); margin-top:6px;}
 .chart .col .cap{font-size:10px; color:var(--faint); margin-top:2px;}
+/* ===== 動態層：外框流光 × 金流 × 呼吸資金池 ===== */
+@property --ang{syntax:'<angle>'; initial-value:0deg; inherits:false;}
+:root{--beam:#3d8bf5; --beam-hi:#cfe2ff; --flow-in:#1f9d63; --flow-out:#d84636;}
+html[data-theme="dark"]{--beam:#FF8A00; --beam-hi:#EDE9E0; --flow-in:#4db07a; --flow-out:#e0574a;}
+/* 每一層外框：一道光沿著邊框繞圈（遮罩只留 1.5px 邊） */
+.card::after{content:''; position:absolute; inset:-1px; border-radius:15px; padding:1.5px; pointer-events:none;
+  background:conic-gradient(from var(--ang), transparent 0 72%, var(--beam) 84%, var(--beam-hi) 90%, transparent 96%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  animation:beamspin 4s linear infinite;}
+.card:nth-of-type(2n)::after{animation-delay:-1.3s;}
+.card:nth-of-type(3n)::after{animation-delay:-2.6s;}
+@keyframes beamspin{to{--ang:360deg;}}
+/* 層與層之間的連接線：虛線往下流動 */
+#layer2::before{opacity:.55; background:repeating-linear-gradient(to bottom, var(--accent) 0 6px, transparent 6px 11px); background-size:2px 22px; animation:linkflow 1.1s linear infinite;}
+@keyframes linkflow{to{background-position:0 22px;}}
+/* 金流：第 1 層流入、第 2 層流出 */
+.flow{position:absolute; left:50%; top:-36px; width:30px; height:34px; transform:translateX(-50%); pointer-events:none;}
+.flow i{position:absolute; left:4px; width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-style:normal; font-weight:700; color:#fff; opacity:0;}
+.flow.in i{background:var(--flow-in); box-shadow:0 0 10px var(--flow-in); animation:coinIn 2.4s ease-in infinite;}
+.flow.out i{background:var(--flow-out); box-shadow:0 0 10px var(--flow-out); animation:coinIn 2.4s ease-in infinite;}
+.flow i:nth-child(2){animation-delay:.8s;}
+.flow i:nth-child(3){animation-delay:1.6s;}
+@keyframes coinIn{0%{transform:translateY(-6px) scale(.7); opacity:0;} 25%{opacity:1;} 80%{opacity:1;} 100%{transform:translateY(26px) scale(.5); opacity:0;}}
+/* 第 2 層底部：獨立生活費 */
+.living{margin-top:14px; padding:12px 14px; border:1px dashed var(--line); border-radius:10px; background:var(--surface2);}
+.living .lh{display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:13px; font-weight:600;}
+.living .lh span{display:inline-flex; align-items:center; gap:6px;}
+.living .lh i{font-size:17px; color:var(--amber);}
+.living input{background:var(--surface);}
+/* 每月可分配＝被動收入資金池：呼吸光球 */
+.bk .sub{font-size:10px; color:var(--amber); margin-top:1px; line-height:1.4;}
+@media (prefers-reduced-motion: reduce){
+  .card::after,.flow i,.wrap > *::before{animation:none !important;}
+  .flow{display:none;}
+}
 @media(max-width:560px){
   .grid3{grid-template-columns:repeat(2,minmax(0,1fr));}
   .exrow .exval{flex:1 1 100px;}
@@ -188,7 +224,7 @@ input[type=range]::-moz-range-thumb{width:18px; height:18px; border:none; border
   html[data-theme="dark"] .metric .v{color:#fff !important;}
   body{background:#fff !important; padding:0 8px !important;}
   .topbar{display:none !important;}
-  .addbtn,.exdel{display:none !important;}
+  .addbtn,.exdel,.flow,.card::after{display:none !important;}
   select{-webkit-appearance:none; appearance:none;}
   .wrap{gap:16px;}
   .wrap > *{transform:none !important; box-shadow:none !important;}
@@ -228,6 +264,7 @@ input[type=range]::-moz-range-thumb{width:18px; height:18px; border:none; border
   </div>
 
   <div class="card" id="layer1">
+    <div class="flow in" aria-hidden="true"><i>$</i><i>$</i><i>$</i></div>
     <div class="hd">
       <div class="l"><i class="ti ti-cash"></i><span class="t">第 1 層 · 每月收入</span></div>
       <span class="sum">合計 <b id="incomeTotal">NT$0</b></span>
@@ -267,18 +304,22 @@ input[type=range]::-moz-range-thumb{width:18px; height:18px; border:none; border
       <label class="f">保險費（年繳請除以 12）<input type="text" inputmode="numeric" class="exp money" id="insurance" placeholder="0"></label>
       <label class="f">雜費（水電瓦斯／其他零星）<input type="text" inputmode="numeric" class="exp money" id="misc" placeholder="0"></label>
     </div>
-    <div class="sec">其他支出（從下拉選單挑，可新增多筆）</div>
+    <div class="sec">其他被動支出（從下拉選單挑，可新增多筆）</div>
     <div id="extraRows"></div>
-    <button type="button" class="addbtn" id="addExtra"><i class="ti ti-plus"></i> 新增一項支出</button>
+    <button type="button" class="addbtn" id="addExtra"><i class="ti ti-plus"></i> 新增一項被動支出</button>
     <div class="sec">其他（自訂項目名稱）</div>
     <div class="grid2">
       <input type="text" id="otherLabel" placeholder="自訂項目名稱">
       <input type="text" inputmode="numeric" class="exp money" id="other" placeholder="0">
     </div>
+    <div class="living">
+      <div class="lh"><span><i class="ti ti-shopping-cart"></i>生活費</span><span class="sum" style="font-weight:400; font-size:12px; color:var(--muted);" id="expBreak">被動 NT$0 ＋ 生活 NT$0</span></div>
+      <label class="f" style="margin-top:6px;">每月生活開銷（餐費・交通・日用品・娛樂，一筆估總數就好）<input class="money" type="text" inputmode="numeric" id="living" placeholder="例如 15,000"></label>
+    </div>
   </div>
 
   <div class="metrics">
-    <div class="metric"><div class="k">每月可分配</div><div class="v" id="disposable">NT$0</div></div>
+    <div class="metric"><div class="k">每月可分配（被動收入資金池）</div><div class="v" id="disposable">NT$0</div></div>
     <div class="metric"><div class="k">緊急預備金 3 倍防線（每月支出×3）</div><div class="v" id="target3">NT$0</div></div>
     <div class="metric"><div class="k">總市值約</div><div class="v" id="totalMV">NT$0</div></div>
   </div>
@@ -304,16 +345,15 @@ input[type=range]::-moz-range-thumb{width:18px; height:18px; border:none; border
       <div class="bk src" id="bkCash"><i class="ti ti-wallet"></i><div class="n">現金</div><div class="a" id="amtCash">NT$0</div><div class="p" id="pctCash">20%</div></div>
       <div class="bk src" id="bkEtf"><i class="ti ti-chart-line"></i><div class="n">ETF 配置</div><div class="a" id="amtEtf">NT$0</div><div class="p" id="pctEtf">60%</div></div>
       <div class="bk" id="bkMem"><i class="ti ti-gift"></i><div class="n">股東紀念品</div><label class="memchk"><input type="checkbox" id="memOn"> 參與</label><input type="text" inputmode="numeric" id="memCost" class="cost money" placeholder="成本 40000"></div>
-      <div class="bk src" id="bkUsdt"><i class="ti ti-coin"></i><div class="n">USDT 理財</div><div class="a" id="amtUsdt">NT$0</div><div class="p" id="pctUsdt">20%</div></div>
+      <div class="bk src" id="bkUsdt"><i class="ti ti-coin"></i><div class="n">USDT 理財</div><div class="p sub">（子彈池：股市崩盤備用金）</div><div class="a" id="amtUsdt">NT$0</div><div class="p" id="pctUsdt">20%</div></div>
     </div>
-    <div class="note"><i class="ti ti-transfer"></i><span>ETF 配置滿 1 張（1000 股）就能把股票借出去，多賺一筆借券收入。股東紀念品是一次性成本、每年回饋，打勾參與即可。</span></div>
+    <div class="note"><i class="ti ti-transfer"></i><span>ETF 配置滿 1 張（1000 股）就能把股票借出去，多賺一筆借券收入。股東紀念品是一次性成本、每年回饋，打勾參與即可。USDT 同時是子彈池：平時穩定幣領息，只在股市大跌（例如大盤回檔 20% 以上）時才動用加碼，平常不碰。</span></div>
 
     <div class="split" id="splitBox" style="opacity:.45; pointer-events:none;">
       <div class="sec">開源分流比例（地基解鎖後可調）</div>
       <div class="srow"><span class="sn">ETF</span><input type="range" id="sEtf" min="0" max="100" step="5" value="60"><span class="sv" id="oEtf">60%</span></div>
       <div class="srow"><span class="sn">現金</span><input type="range" id="sCash" min="0" max="100" step="5" value="20"><span class="sv" id="oCash">20%</span></div>
-      <div class="srow"><span class="sn">USDT</span><input type="range" id="sUsdt" min="0" max="100" step="5" value="20"><span class="sv" id="oUsdt">20%</span></div>
-    </div>
+      <div class="srow"><span class="sn">USDT</span><input type="range" id="sUsdt" min="0" max="100" step="5" value="20"><span class="sv" id="oUsdt">20%</span></div>    </div>
   </div>
 
   <div class="ban">
@@ -335,8 +375,7 @@ input[type=range]::-moz-range-thumb{width:18px; height:18px; border:none; border
     <div class="irow"><span class="in">現金</span><input class="money" type="text" inputmode="numeric" id="balCash" readonly placeholder="市值"><span class="rt">1.5%</span><span class="iv" id="incCash">NT$0</span><input type="text" inputmode="numeric" class="act money" id="actCash" placeholder="實際"></div>
     <div class="irow"><span class="in">ETF 加個股</span><input class="money" type="text" inputmode="numeric" id="balEtf" placeholder="市值"><span class="rt">8%</span><span class="iv" id="incEtf">NT$0</span><input type="text" inputmode="numeric" class="act money" id="actEtf" placeholder="實際"></div>
     <div class="irow"><span class="in">股東紀念品 🎫🧼🧴</span><input class="money" type="text" inputmode="numeric" id="balMem" readonly placeholder="＝成本"><span class="rt">回饋</span><span class="iv" id="incMem">NT$0</span><input type="text" inputmode="numeric" class="act money" id="actMem" placeholder="實際"></div>
-    <div class="irow"><span class="in">USDT 理財</span><input class="money" type="text" inputmode="numeric" id="balUsdt" placeholder="市值"><span class="rt">6%</span><span class="iv" id="incUsdt">NT$0</span><input type="text" inputmode="numeric" class="act money" id="actUsdt" placeholder="實際"></div>
-    <div class="irow"><span class="in">房產收入</span><input class="money" type="text" inputmode="numeric" id="houseBal" placeholder="市值"><span class="rt"><input type="number" id="houseRate" min="0" step="0.5" value="2" placeholder="%"></span><span class="iv" id="incHouse">NT$0</span><input type="text" inputmode="numeric" class="act money" id="actHouse" placeholder="實際"></div>
+    <div class="irow"><span class="in">USDT 理財<br><span style="font-size:10px; color:var(--muted);">（子彈池）</span></span><input class="money" type="text" inputmode="numeric" id="balUsdt" placeholder="市值"><span class="rt">6%</span><span class="iv" id="incUsdt">NT$0</span><input type="text" inputmode="numeric" class="act money" id="actUsdt" placeholder="實際"></div>    <div class="irow"><span class="in">房產收入</span><input class="money" type="text" inputmode="numeric" id="houseBal" placeholder="市值"><span class="rt"><input type="number" id="houseRate" min="0" step="0.5" value="2" placeholder="%"></span><span class="iv" id="incHouse">NT$0</span><input type="text" inputmode="numeric" class="act money" id="actHouse" placeholder="實際"></div>
     <div class="irow" style="margin-bottom:12px;"><span class="in">其他開源</span><input class="money" type="text" inputmode="numeric" id="otherOpenBal" placeholder="市值"><span class="rt"><input type="number" id="otherOpenRate" min="0" step="0.5" placeholder="%"></span><span class="iv" id="incOther">NT$0</span><input type="text" inputmode="numeric" class="act money" id="actOther" placeholder="實際"></div>
     <div class="mv"><span class="sec" style="margin:0;">開源總市值約</span><span class="v" id="openMV">NT$0</span></div>
     <div class="total" style="margin-top:8px;"><span class="sec" style="margin:0;">月被動 · 預估／實際／目標3萬</span><span class="v"><span id="monthlyPassive">NT$0</span> <span style="color:var(--muted); font-size:12px;">/</span> <span id="monthlyActual" style="color:var(--accent);">NT$0</span></span></div>
@@ -408,7 +447,7 @@ input[type=range]::-moz-range-thumb{width:18px; height:18px; border:none; border
     ['家庭', ['補習與才藝費','長輩照護／看護費','寵物開銷（飼料・醫療）']],
     ['個人', ['手機門號（電信月租）','醫療與健康（回診・藥品・健檢）','進修學習（課程・證照）']]
   ];
-  var fields=['active','mortgage','credit','pledge','yt','ai','media','parents','kids','net','insurance','misc','otherLabel','other','emergency','cash','balEtf','balUsdt','memOn','memCost','houseBal','houseRate','otherOpenBal','otherOpenRate','actBase','actCash','actEtf','actMem','actUsdt','actHouse','actOther','stockMV','pledgeLoan','debtMortgage','debtCredit','sEtf','sCash','sUsdt'];
+  var fields=['active','mortgage','credit','pledge','yt','ai','media','parents','kids','net','insurance','misc','otherLabel','other','emergency','cash','balEtf','balUsdt','memOn','memCost','houseBal','houseRate','otherOpenBal','otherOpenRate','actBase','actCash','actEtf','actMem','actUsdt','actHouse','actOther','stockMV','pledgeLoan','debtMortgage','debtCredit','sEtf','sCash','sUsdt','living'];
   var fmt=function(n){return 'NT$'+Math.round(n||0).toLocaleString('en-US');};
   var el=function(id){return document.getElementById(id);};
   // ── 千分位：輸入與顯示都帶逗點，計算時再把逗點拿掉 ──
@@ -507,7 +546,10 @@ input[type=range]::-moz-range-thumb{width:18px; height:18px; border:none; border
 
   function render(){
     var active=num('active');
-    var expTotal=num('mortgage')+num('credit')+num('pledge')+num('yt')+num('ai')+num('media')+num('parents')+num('kids')+num('net')+num('insurance')+num('misc')+num('other')+extrasTotal();
+    var passiveExp=num('mortgage')+num('credit')+num('pledge')+num('yt')+num('ai')+num('media')+num('parents')+num('kids')+num('net')+num('insurance')+num('misc')+num('other')+extrasTotal();
+    var living=num('living');
+    var expTotal=passiveExp+living;
+    el('expBreak').textContent='被動 '+fmt(passiveExp)+' ＋ 生活 '+fmt(living);
     var emergency=num('emergency'), cash=num('cash');
     var memOn=el('memOn').checked, memCost=num('memCost');
 
@@ -565,8 +607,7 @@ input[type=range]::-moz-range-thumb{width:18px; height:18px; border:none; border
       el('amtBase').textContent=fmt(disposable); el('tagBase').textContent='全額補地基';
       el('amtEtf').textContent='鎖定'; el('pctEtf').textContent='—';
       el('amtCash').textContent='鎖定'; el('pctCash').textContent='—';
-      el('amtUsdt').textContent='鎖定'; el('pctUsdt').textContent='—';
-    }
+      el('amtUsdt').textContent='鎖定'; el('pctUsdt').textContent='—';    }
 
     el('incBase').textContent=fmt(iBase/12);
     el('incCash').textContent=fmt(iCash/12);
@@ -629,6 +670,15 @@ input[type=range]::-moz-range-thumb{width:18px; height:18px; border:none; border
     save(false);
   }
 
+  // 只有第 2 層上方那條放紅色流出金幣（第 1 層頂端的綠色流入寫在 HTML 裡）
+  // 第 2 層之後的連接線維持原本單純藍線，不放金幣
+  [el('layer2')].forEach(function(b){
+    var f=document.createElement('div');
+    f.className='flow '+(b.id==='layer2'?'out':'in');
+    f.setAttribute('aria-hidden','true');
+    f.innerHTML='<i>$</i><i>$</i><i>$</i>';
+    b.insertBefore(f,b.firstChild);
+  });
   document.querySelectorAll('input.money').forEach(bindMoney);
   fields.forEach(function(f){el(f).addEventListener('input',render); if(f==='memOn') el(f).addEventListener('change',render);});
   document.querySelectorAll('.nav button').forEach(function(b){b.addEventListener('click',function(){var t=el(b.getAttribute('data-go')); if(t) t.scrollIntoView({behavior:'smooth',block:'start'});});});
